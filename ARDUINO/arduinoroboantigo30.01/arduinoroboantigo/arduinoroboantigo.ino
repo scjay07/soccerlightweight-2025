@@ -1,53 +1,61 @@
-//GK ARDUINO JOGO 2
-
+//GK
 #include <Adafruit_NeoPixel.h>
 Adafruit_NeoPixel led(32, A11, NEO_GBR + NEO_KHZ800);
+#include <MPU6050_light.h>  //Include library for MPU communication
+
+/*TODOS
+
+   ADICIONAR LINHAS BRANCAS NO CODIGO
+   ARRUMAR PEGAR BOLA POR TRAS, VERIFICAR QUE O SENSOR GIROSCOPIO FORCA O ROBO A FICAR ´PARA FRENTE, LOGO OS PARAMETROS QUE FAZEM O ROBO ANDAR LATERALMENTE NÃO FUNCIONAM CORRETAMENTE
+   DIGA
 
 
-//const int minluz[] = {16,8,19,14,7,15,11,3,16,8,16};
-//const int maxluz[] = {74,44,108,98,49,101,87,7,120,87,118};
 
-const int minluz[] = {11, 5, 15, 11, 4, 13, 7, 0, 16, 7, 13};
-const int maxluz[] = {40, 39, 26, 20, 13, 27, 15, 1, 35, 13, 39};
+*/
+//const int minluz[] = { 8, 15, 10, 8, 2, 5, 1, 0, 6, 1, 12 };
+//const int maxluz[] = { 38, 46, 29, 28, 11, 19, 7, 0, 23, 14, 42 };
+//const int minluz[] = {11,5,15,11,4,13,7,0,16,7,13};
+//const int maxluz[] = {40,39,26,20,13,27,15,1,35,13,39};
+//const int minluz[] = {11,11,8,10,7,4,0,0,10,4,11};
+//const int maxluz[] = {29,30,16,24,15,10,4,0,18,12,31};
+//const int minluz[] = {9, 10, 15, 11, 4, 13, 7, 0, 16, 7, 13};
+//const int maxluz[] = {35, 40, 26, 20, 13, 27, 15, 1, 35, 13, 39};
+const int minluz[] = {8,11,9,10,6,6,0,0,9,5,8};
+const int maxluz[] = {40,39,14,19,10,25,9,0,33,21,35};
+
 
 
 int x;
 int IR[10];
 const int tetocor = 49;
-const int tetocor1 = 37;
+const int tetocor2 = 46;
 const int tetocor3 = 50;
+
 const int portasluz[] = { A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10 };
 float valorluz[11];
+int ir, bola, gol;
+int s[4] = { 1, 1, 1, 1 };
+
+
 int angulolido;
 int angulocorrecao;
-int target;
-float kp = 0.5;
+int target = 0;
 int erro = 0;
-int ir;
-int bola;
-int gol;
+unsigned long tempoinicial = 0;
+bool alinhando = false;
 
 
-// Motor PWM and Direction pin assignments
-const int DIR_PIN_FL1 = 28;  // Front-left motor
-const int DIR_PIN_FR1 = 34;  // Front-right motor
-const int DIR_PIN_RL1 = 26;  // Rear-left motor
-const int DIR_PIN_RR1 = 36;  // Rear-right motor
-const int DIR_PIN_FL2 = 29;
-const int DIR_PIN_FR2 = 35;
-const int DIR_PIN_RL2 = 27;
-const int DIR_PIN_RR2 = 37;
-const int PWM_PIN_FL = 12;
-const int PWM_PIN_FR = 8;
-const int PWM_PIN_RL = 11;
-const int PWM_PIN_RR = 6;
+const int DIR_PIN_FL1 = 28, DIR_PIN_FR1 = 34, DIR_PIN_RL1 = 26, DIR_PIN_RR1 = 36;
+const int DIR_PIN_FL2 = 29, DIR_PIN_FR2 = 35, DIR_PIN_RL2 = 27, DIR_PIN_RR2 = 37;
+const int PWM_PIN_FL = 12, PWM_PIN_FR = 8, PWM_PIN_RL = 11, PWM_PIN_RR = 6;
 
 
-const float sen45 = sqrt(2) / 2;
-const float cos45 = sqrt(2) / 2;
+const float sen45 = sqrt(2) / 2, cos45 = sqrt(2) / 2;
 float wfe, wfd, wte, wtd;
 byte wfe_v, wfd_v, wte_v, wtd_v;
-int s[4] = { 1, 1, 1, 1 };
+
+
+float kp = 0.8;  // Ajuste fino do ganho proporcional
 
 
 void setMotor(int pwmPin, int dirPin1, int dirPin2, float velocidade, int sentido) {
@@ -76,38 +84,6 @@ int sentidomotor(float w, int indice) {
 }
 
 
-void girareixoH() {
-  digitalWrite(DIR_PIN_FL1, HIGH);
-  digitalWrite(DIR_PIN_FL2, LOW);
-  analogWrite(PWM_PIN_FL, 40);
-  digitalWrite(DIR_PIN_FR1, HIGH);
-  digitalWrite(DIR_PIN_FR2, LOW);
-  analogWrite(PWM_PIN_FR, 40);
-  digitalWrite(DIR_PIN_RL1, HIGH);
-  digitalWrite(DIR_PIN_RL2, LOW);
-  analogWrite(PWM_PIN_RL, 40);
-  digitalWrite(DIR_PIN_RR1, HIGH);
-  digitalWrite(DIR_PIN_RR2, LOW);
-  analogWrite(PWM_PIN_RR, 40);
-}
-
-
-void girareixoA() {
-  digitalWrite(DIR_PIN_FL1, LOW);
-  digitalWrite(DIR_PIN_FL2, HIGH);
-  analogWrite(PWM_PIN_FL, 40);
-  digitalWrite(DIR_PIN_FR1, LOW);
-  digitalWrite(DIR_PIN_FR2, HIGH);
-  analogWrite(PWM_PIN_FR, 40);
-  digitalWrite(DIR_PIN_RL1, LOW);
-  digitalWrite(DIR_PIN_RL2, HIGH);
-  analogWrite(PWM_PIN_RL, 40);
-  digitalWrite(DIR_PIN_RR1, LOW);
-  digitalWrite(DIR_PIN_RR2, HIGH);
-  analogWrite(PWM_PIN_RR, 40);
-}
-
-
 void parar() {
   digitalWrite(DIR_PIN_FL1, HIGH);
   digitalWrite(DIR_PIN_FL2, HIGH);
@@ -130,25 +106,25 @@ void mover(int vel, int angulo) {
   float vy = vel * sin(angulorad);
 
 
-  wfe = (cos45 * vx + sen45 * vy) - angulocorrecao;
-  wfd = (-cos45 * vx + sen45 * vy) - angulocorrecao;
-  wte = (cos45 * vx - sen45 * vy) - angulocorrecao;
-  wtd = (-cos45 * vx - sen45 * vy) - angulocorrecao;
+  wfe = (cos45 * vx + sen45 * vy);
+  wfd = (-cos45 * vx + sen45 * vy);
+  wte = (cos45 * vx - sen45 * vy);
+  wtd = (-cos45 * vx - sen45 * vy);
 
 
-  sentidomotor(wfe + angulocorrecao, 0);
-  sentidomotor(wfd + angulocorrecao, 1);
-  sentidomotor(wte + angulocorrecao, 2);
-  sentidomotor(wtd + angulocorrecao, 3);
+  sentidomotor(wfe, 0);
+  sentidomotor(wfd, 1);
+  sentidomotor(wte, 2);
+  sentidomotor(wtd, 3);
 
 
   float maxVel = max(max(abs(wfe), abs(wfd)), max(abs(wte), abs(wtd))) + 20;
 
 
-  wfe_v = (byte)map(abs(wfe), 0, maxVel, 60, 255);
-  wfd_v = (byte)map(abs(wfd), 0, maxVel, 60, 255);
-  wte_v = (byte)map(abs(wte), 0, maxVel, 60, 255);
-  wtd_v = (byte)map(abs(wtd), 0, maxVel, 60, 255);
+  wfe_v = (byte)map(abs(wfe), 0, maxVel, 45, 255);
+  wfd_v = (byte)map(abs(wfd), 0, maxVel, 40, 255);
+  wte_v = (byte)map(abs(wte), 0, maxVel, 40, 255);
+  wtd_v = (byte)map(abs(wtd), 0, maxVel, 40, 255);
 
 
   setMotor(PWM_PIN_FL, DIR_PIN_FL1, DIR_PIN_FL2, wfe_v, s[0]);
@@ -158,47 +134,42 @@ void mover(int vel, int angulo) {
 }
 
 
-void mudarluz(int b, int g, int r) {
-  for (int k = 0; k < 32; k++) {
-    led.setPixelColor(k, led.Color(g, b, r));
+int mediaSensorIR(int leituraAtual) {
+  static int buffer[5] = { 0 };
+  static int indice = 0;
+  buffer[indice] = leituraAtual;
+  indice = (indice + 1) % 5;
+
+
+  int soma = 0;
+  for (int i = 0; i < 5; i++) {
+    soma += buffer[i];
   }
-  led.show();
+  return soma / 5;
+}
+void alinhar() {
+
+  if (angulocorrecao > 0 && angulocorrecao <= 100) angulocorrecao = 300;
+  if (angulocorrecao < 0 && angulocorrecao >= -100) angulocorrecao = -300;
+  if (angulocorrecao >= 400 || angulocorrecao <= -400) kp *= 0.5;
+  wfe = 0 - angulocorrecao;
+  wte = 0 - angulocorrecao;
+  wfd = 0 - angulocorrecao;
+  wtd = 0 - angulocorrecao;
+  wfe_v = (byte)map(abs(wfe), 0, 1500, 0, 255);
+  wfd_v = (byte)map(abs(wfd), 0, 1500, 0, 255);
+  wte_v = (byte)map(abs(wte), 0, 1500, 0, 255);
+  wtd_v = (byte)map(abs(wtd), 0, 1500, 0, 255);
+  sentidomotor(wfe, 0);
+  sentidomotor(wfd, 1);
+  sentidomotor(wte, 2);
+  sentidomotor(wtd, 3);
+  setMotor(PWM_PIN_FL, DIR_PIN_FL1, DIR_PIN_FL2, wfe_v, s[0]);
+  setMotor(PWM_PIN_FR, DIR_PIN_FR1, DIR_PIN_FR2, wfd_v, s[1]);
+  setMotor(PWM_PIN_RL, DIR_PIN_RL1, DIR_PIN_RL2, wte_v, s[2]);
+  setMotor(PWM_PIN_RR, DIR_PIN_RR1, DIR_PIN_RR2, wtd_v, s[3]);
 }
 
-void girar_bola()
-{
-  digitalWrite(DIR_PIN_FL1, LOW);
-  digitalWrite(DIR_PIN_FL2, HIGH);
-  analogWrite(PWM_PIN_FL, 200);
-  digitalWrite(DIR_PIN_RR1, HIGH);
-  digitalWrite(DIR_PIN_RR2, LOW);
-  analogWrite(PWM_PIN_RR, 200);
-  delay(150);
-  parar();
-  delay(10);
-  digitalWrite(DIR_PIN_FR1, LOW);
-  digitalWrite(DIR_PIN_FR2, HIGH);
-  analogWrite(PWM_PIN_FR, 200);
-  digitalWrite(DIR_PIN_RL1, HIGH);
-  digitalWrite(DIR_PIN_RL2, LOW);
-  analogWrite(PWM_PIN_RL, 200);
-  delay(150);
-  parar();
-  delay(100);
-  digitalWrite(DIR_PIN_FR1, LOW);
-  digitalWrite(DIR_PIN_FR2, LOW);
-  analogWrite(PWM_PIN_FR, 0);
-  digitalWrite(DIR_PIN_RL1, HIGH);
-  digitalWrite(DIR_PIN_RL2, LOW);
-  analogWrite(PWM_PIN_RL, 200);
-  digitalWrite(DIR_PIN_RR1, LOW);
-  digitalWrite(DIR_PIN_RR2, LOW);
-  analogWrite(PWM_PIN_RR, 0);
-  digitalWrite(DIR_PIN_FL1, LOW);
-  digitalWrite(DIR_PIN_FL2, LOW);
-  analogWrite(PWM_PIN_FL, 0);
-  delay(600);
-}
 
 void setup() {
   pinMode(PWM_PIN_FL, OUTPUT);
@@ -214,8 +185,8 @@ void setup() {
   pinMode(DIR_PIN_RL2, OUTPUT);
   pinMode(DIR_PIN_RR2, OUTPUT);
   led.begin();
-  Serial.begin(9600);
-  Serial2.begin(9600);
+  Serial.begin(115200);
+  Serial2.begin(115200);
   Serial2.setTimeout(5);
   for (int k = 0; k < 32; k++) {
     led.setPixelColor(k, led.Color(0, 0, 255));
@@ -225,19 +196,28 @@ void setup() {
     pinMode(portasluz[i], INPUT);
   }
   Serial.println("INICIADO");
-  mover (100, 45);
-  delay (600);
+//  mover(70, 0);
+//  delay (600);
+
 }
 
 
-void loop() {
-  erro = target - angulolido;
-  angulocorrecao = kp * erro;
-  for (int i = 0; i < 11; i++) {
-    valorluz[i] = analogRead(portasluz[i]);
-    valorluz[i] = (int)map(valorluz[i], minluz[i], maxluz[i], 0, 50);
-    valorluz[i] = constrain(valorluz[i], 0, 50);
+void mudar_cor(int r, int g, int b)
+{
+  for (int k = 0; k < 32; k++) {
+    led.setPixelColor(k, led.Color(r, g, b));
   }
+  led.show();
+
+}
+
+void loop() 
+{
+//  for (int i = 0; i < 11; i++) {
+//    valorluz[i] = analogRead(portasluz[i]);
+//    valorluz[i] = (int)map(valorluz[i], minluz[i], maxluz[i], 0, 50);
+//    valorluz[i] = constrain(valorluz[i], 0, 50);
+//  }
   //  if (valorluz[2] >= tetocor3) //|| valorluz[3] >= tetocor3 || valorluz[4] >= tetocor3) // o sensor 4 ta aumentando muito quando liga o robo
   //  {
   //
@@ -255,15 +235,7 @@ void loop() {
   //    parar();
   //    delay(100);
   //  }
-  //  else if (valorluz[5] >= tetocor || valorluz[6] >= tetocor || valorluz[7] >= tetocor)
-  //  {
-  //    //vai para norte
-  //    mover(50, 0);
-  //    delay(300);
-  //    parar();
-  //    delay(100);
-  //    Serial.println("norte");
-  //  }
+
   //  else if (//valorluz[8] >= tetocor ||valorluz[9] >= tetocor ||
   //    valorluz[10] >= tetocor)
   //  {
@@ -281,75 +253,133 @@ void loop() {
   //    parar();
   //    delay(100);
   //  }
-  //  if (valorluz[0] >= tetocor || valorluz[1] >= tetocor1) {
-  //    target = angulolido;
-  //    Serial.println("sul");
-  //    for (int k = 0; k < 32; k++) {
-  //      led.setPixelColor(k, led.Color(0, 255, 0));
-  //    }
-  //    parar();
-  //    delay(100);
-  //    mover(20, 180);
-  //    delay(300);
-  //    parar();
-  //    delay(100);
-  //  } else {
-  //Serial.println("seguir");
-  if (Serial2.available()) {
-    int msg = Serial2.parseInt();
-    if (msg != 0) {
-      if (msg >= 1023 && msg <= 1025) {
-        bola = msg;
-      } else if (msg >= 2640 && msg <= 3360) {
+  if (valorluz[0] >= tetocor //|| valorluz[1] >= tetocor
+  ) {
+    target = angulolido;
+    Serial.println("sul");
+    for (int k = 0; k < 32; k++) {
+      led.setPixelColor(k, led.Color(0, 255, 0));
+    }
+    parar();
+    delay(100);
+    mover(20, 180);
+    delay(300);
+    parar();
+    delay(100);
+  }
+//  else if (valorluz[5] >= tetocor //|| valorluz[6] >= tetocor || valorluz[7] >= tetocor
+//          )
+//  {
+//    target = angulolido;
+//    Serial.println("norte");
+//    for (int k = 0; k < 32; k++) {
+//      led.setPixelColor(k, led.Color(0, 255, 0));
+//    }
+//    parar();
+//    delay(100);
+//    mover(20, 0);
+//    delay(300);
+//    parar();
+//    delay(100);
+//  }
+  else {
+
+    if (Serial2.available()) {
+      int msg = Serial2.parseInt();
+      if (msg >= 2640 && msg <= 3360) {
         angulolido = (msg - 3000);
-      } else if (msg >= 1001 && msg <= 1017) {
-        ir = (msg - 1000);
-        Serial.println(ir);
-      } else if (msg == 333 || msg == 444 || msg == 666) {
-        gol = msg;
+        //Serial.println(angulolido);
       }
-      if (bola == 1024) {
-        for (int k = 0; k < 24; k++) {
-          led.setPixelColor(k, led.Color(0, 0, 255));
-        }
-        led.show();
-        parar();
-        if (gol == 333) {
-          Serial.println("esquerda");
-          girareixoA();
-        } else if (gol == 666) {
-          Serial.println("direita");
-          //            parar();
-          //            delay(50);
-          //            girar_bola();
-        } else if (gol == 444)
+
+      if (msg >= 1001 && msg <= 1017) {
+        ir = msg - 1000;  
+        Serial.println(ir);
+      }
+      if (abs(angulolido) > 30) {//se o rob|ô estiver desalinhado em até 50 graus, então alinha
+
+        tempoinicial = millis();
+
+        while (abs(angulolido) > 30 && (millis() - tempoinicial) <= 75)
         {
-          Serial.println("frente");
-          parar();
-          for (int k = 0; k < 32; k++) {
-            led.setPixelColor(k, led.Color(0, 0, 255));
+          mudar_cor(0, 0, 255);
+          msg = Serial2.parseInt();
+          if (msg >= 2640 && msg <= 3360) {
+            angulolido = (msg - 3000);
+            erro = target - angulolido;
+            angulocorrecao = kp * erro;
+            //Serial.println(angulolido);
+            alinhar();
+            //parar();
           }
-          led.show();
         }
-      } else if (bola == 1023) {
-        if (ir >= 2 && ir <= 8) {
-          girareixoA();
-          target = angulolido;
-        } else if (ir >= 9 && ir <= 15) {
-          girareixoH();
-          target = angulolido;
-        } else if (ir == 1 || ir == 16) {
+      }
+      else {//se o robÔ estiver alinhado para frente, então vai ler os sensores IR
 
-
-          for (int k = 0; k < 32; k++) {
-            led.setPixelColor(k, led.Color(0, 0, 255));
-          }
-          led.show();
-          target = angulolido;
-          mover(150, 0);
-          delay(3);
+        int velocidadeBase = 40;  // Velocidade base ajustada para estabilidade
+        if (msg >= 1001 && msg <= 1017) {
+          ir = msg - 1000;  // Suavização da leitura do sensor IR
+        }
+        //      if (ir == 1 || ir == 16) {
+        //        mudar_cor(255, 255, 255);
+        //        mover(velocidadeBase, 0);
+        //        delay(200);
+        //      }
+        //      if (ir >= 2 && ir <= 5)
+        //      {
+        //        mudar_cor(255, 0, 0);
+        //        mover(velocidadeBase, 280);
+        //      }
+        //      else if (ir >= 5 && ir <= 7)
+        //      {
+        //        mudar_cor(255, 255, 0);
+        //        mover(velocidadeBase, 140);
+        //        delay(500);
+        //        parar();
+        //        delay(5000);
+        //        mover(velocidadeBase, 220);
+        //        delay(500);
+        //        parar();
+        //        delay(20000);
+        //        mudar_cor(255, 255, 255);
+        //      }
+        //      else if (ir >= 7 && ir <= 9)
+        //      {
+        //        mudar_cor(255, 0, 255);
+        //        mover(velocidadeBase, 250);
+        //        delay(300);
+        //        parar();
+        //        delay(2000);
+        //        mover(velocidadeBase, 115);
+        //        delay(300);
+        //        parar();
+        //        delay(2000);
+        //        mudar_cor(255, 255, 255);
+        //      }
+        if (ir >= 2 && ir <= 4) {
+          mover(velocidadeBase, 240);  // Move para a esquerda (considerando sensores traseiros)
+        }
+        else if (ir >= 5 && ir <= 8)
+        {
+          mover(velocidadeBase, 190);
+        }
+        else if (ir == 9 || ir ==  10)
+        {
+          mover(velocidadeBase, 255);
+        }
+        else if (ir >= 11 && ir <= 12) {
+          mover(velocidadeBase, 170);  // Move para a direita
+        }
+        else if (ir >= 13 && ir <= 15)
+        {
+          mover(velocidadeBase, 140);
+        }
+        else if (ir == 1 || ir == 16) {
+          mover(velocidadeBase, 0);  // Move para frente//
         }
       }
     }
   }
 }
+
+
+
