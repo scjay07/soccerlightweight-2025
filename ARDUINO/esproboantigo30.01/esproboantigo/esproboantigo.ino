@@ -36,7 +36,7 @@ int x;
 int IR[16];
 int valor[16];
 const int portas[16] =  {15, 4, 5, 18, 19, 36, 39, 23, 13, 14, 26, 25, 33, 32, 35, 34};
-const int minimo[16] = {4026,4114,4302,4617,4413,4241,4310,4664,4928,4030,4330,4867,4082,4502,4128,4280};
+const int minimo[16] = {4026, 4114, 4302, 4617, 4413, 4241, 4310, 4664, 4928, 4030, 4330, 4867, 4082, 4502, 4128, 4280};
 //4332,4173,4341,4493,-1,2791,4398,4194,4283,4167,4161,4097,4098,4422,4255,4847
 
 //
@@ -96,6 +96,10 @@ void setup() {
   mySerial.begin(9600, SERIAL_8N1, mySerialRX, mySerialTX);
   mySerial.setTimeout(5);
   Wire.begin();
+  if (!bno.begin()) {
+    Serial.print("Não foi possível encontrar o sensor BNO055");
+    while (1);
+  }
 
 
 
@@ -118,7 +122,7 @@ void loop() {
     for (int j = 0; j < MAX; j++) valor[i] = 0;
   }
 
- sensors_event_t event;
+  sensors_event_t event;
   bno.getEvent(&event);
 
   // Leitura bruta do eixo Z
@@ -157,29 +161,29 @@ void loop() {
     }
   }
 
-   if(angulogiro > 180) angulogiro -= 360;
-//    for (int i = 0; i < qtd_leituras; i++)
-//    {
-//      lista_min[i] = leitura();
-//    }
-//  
-//    for (int i = 0; i < qtd_leituras; i++) {
-//      contagem[i] = 0;
-//    }
-//  
-//    for (int i = 0; i < qtd_leituras; i++) {
-//      contagem[lista_min[i]]++;
-//    }
-//  
-//    int maxContagem = 0;
-//    for (int i = 0; i < qtd_leituras; i++) {
-//      if (contagem[lista_min[i]] > maxContagem) {
-//        maxContagem = contagem[lista_min[i]];
-//        index = lista_min[i];
-//      }
-//    }
-  Serial.println(index);
-  Serial.println(bola);
+  if (angulogiro > 180) angulogiro -= 360;
+  //    for (int i = 0; i < qtd_leituras; i++)
+  //    {
+  //      lista_min[i] = leitura();
+  //    }
+  //
+  //    for (int i = 0; i < qtd_leituras; i++) {
+  //      contagem[i] = 0;
+  //    }
+  //
+  //    for (int i = 0; i < qtd_leituras; i++) {
+  //      contagem[lista_min[i]]++;
+  //    }
+  //
+  //    int maxContagem = 0;
+  //    for (int i = 0; i < qtd_leituras; i++) {
+  //      if (contagem[lista_min[i]] > maxContagem) {
+  //        maxContagem = contagem[lista_min[i]];
+  //        index = lista_min[i];
+  //      }
+  //    }
+  //  Serial.println(index);
+  //Serial.println(bola);
 
   if ((IR[0] < 2 && IR[15] < 2))
   {
