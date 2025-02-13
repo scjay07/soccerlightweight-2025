@@ -1,3 +1,4 @@
+
 #include <Adafruit_NeoPixel.h>
 Adafruit_NeoPixel led(32, A11, NEO_GBR + NEO_KHZ800);
 
@@ -18,8 +19,10 @@ const int portasluz[] = { A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10 };
 float valorluz[11];
 int angulolido;
 int angulocorrecao;
+int erromover;
 int target;
 float kp = 0.55;
+float kpm = 1.3;
 int erro = 0;
 int ir;
 int bola;
@@ -128,10 +131,10 @@ void mover(int vel, int angulo) {
   float vy = vel * sin(angulorad);
 
 
-  wfe = (cos45 * vx + sen45 * vy) - angulocorrecao;
-  wfd = (-cos45 * vx + sen45 * vy) - angulocorrecao;
-  wte = (cos45 * vx - sen45 * vy) - angulocorrecao;
-  wtd = (-cos45 * vx - sen45 * vy) - angulocorrecao;
+  wfe = (cos45 * vx + sen45 * vy);
+  wfd = (-cos45 * vx + sen45 * vy);
+  wte = (cos45 * vx - sen45 * vy);
+  wtd = (-cos45 * vx - sen45 * vy);
 
 
   sentidomotor(wfe, 0);
@@ -143,10 +146,10 @@ void mover(int vel, int angulo) {
   float maxVel = max(max(abs(wfe), abs(wfd)), max(abs(wte), abs(wtd))) + 20;
 
 
-  wfe_v = (byte)map(abs(wfe), 0, maxVel, 60, 255);
-  wfd_v = (byte)map(abs(wfd), 0, maxVel, 60, 255);
-  wte_v = (byte)map(abs(wte), 0, maxVel, 60, 255);
-  wtd_v = (byte)map(abs(wtd), 0, maxVel, 60, 255);
+  wfe_v = (byte)map(abs(wfe), 0, maxVel, 60, 255) - erromover;
+  wfd_v = (byte)map(abs(wfd), 0, maxVel, 80, 255) - erromover;
+  wte_v = (byte)map(abs(wte), 0, maxVel, 60, 255) - erromover;
+  wtd_v = (byte)map(abs(wtd), 0, maxVel, 60, 255) - erromover;
 
 
   setMotor(PWM_PIN_FL, DIR_PIN_FL1, DIR_PIN_FL2, wfe_v, s[0]);
@@ -223,7 +226,7 @@ void setup() {
     pinMode(portasluz[i], INPUT);
   }
   Serial.println("INICIADO");
-  mover(100, 45);
+  //mover(100, 45);
   delay(600);
 }
 
@@ -231,6 +234,7 @@ void setup() {
 void loop() {
   erro = target - angulolido;
   angulocorrecao = kp * erro;
+  erromover = kpm * erro;
   for (int i = 0; i < 11; i++) {
     valorluz[i] = analogRead(portasluz[i]);
     valorluz[i] = (int)map(valorluz[i], minluz[i], maxluz[i], 0, 50);
@@ -257,87 +261,89 @@ void loop() {
         }
         led.show();
         parar();
-      } else if (bola == 1023) {
-        switch (ir)
-        {
+      }
+      else if (bola == 1023) 
+      {
+        switch (ir) {
           case 1: //IR1
             Serial.println("0 graus");
+            parar();
             mover(30, 0);
             delay(20);
             break;
           case 2:
             Serial.println("20 graus");
-            mover(30, 20);
+            mover(30, 315);
             delay(20);
             break;
           case 3:
             Serial.println("40 graus");
-            mover(30, 40);
+            mover(30, 292);
             delay(20);
             break;
           case 4:
             Serial.println("60 graus");
-            mover(30, 60);
+            mover(30, 270);
             delay(20);
             break;
           case 5:
             Serial.println("80 graus");
-            mover(30, 80);
+            mover(30, 247);
             delay(20);
             break;
           case 6:
             Serial.println("100 graus");
-            mover(30, 100);
+            mover(30, 225);
             delay(20);
             break;
           case 7:
             Serial.println("120 graus");
-            mover(30, 120);
+            mover(30, 202);
             delay(20);
             break;
           case 8:
             Serial.println("140 graus");
-            mover(30, 140);
+            mover(30, 180);
             delay(20);
             break;
           case 9:
             Serial.println("160 graus");
-            mover(30, 160);
+            mover(30, 157);
             delay(20);
             break;
           case 10:
             Serial.println("180 graus");
-            mover(30, 180);
+            mover(30, 135);
             delay(20);
             break;
           case 11:
             Serial.println("200 graus");
-            mover(30, 200);
+            mover(30, 112);
             delay(20);
             break;
           case 12:
             Serial.println("220 graus");
-            mover(30, 220);
+            mover(30, 90);
             delay(20);
             break;
           case 13:
             Serial.println("250 graus");
-            mover(30, 250);
+            mover(30, 67);
             delay(20);
             break;
           case 14:
             Serial.println("280 graus");
-            mover(30, 280);
+            mover(30, 45);
             delay(20);
             break;
           case 15:
-            Serial.println("20 graus");
-            mover(30, 300);
+            Serial.println("300 graus");
+            mover(30, 22);
             delay(20);
             break;
           case 16:
-            Serial.println("20 graus");
-            mover(30, 360);
+            Serial.println("360 graus");
+            mover(30, 0);
             delay(20);
             break;
           default:
