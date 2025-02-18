@@ -301,10 +301,10 @@ void loop() {
       else if (msg == 333 || msg == 444 || msg == 666) {
         gol = msg;
       }
-      if (abs(angulolido) > 20)
+      if (abs(angulolido) > 15)
       { //se o robô estiver desalinhado em até 50 graus, então alinha);
         tempoinicial = millis();
-        while ((abs(angulolido) > 20 && abs(angulolido) < 340) && (millis() - tempoinicial) <= 75)
+        while ((abs(angulolido) > 15 && abs(angulolido) < 345) && (millis() - tempoinicial) <= 75)
         {
           mudar_cor(0, 0, 255);
           msg = Serial2.parseInt();
