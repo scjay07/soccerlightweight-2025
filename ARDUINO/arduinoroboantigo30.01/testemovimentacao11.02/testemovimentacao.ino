@@ -1,14 +1,11 @@
-
 #include <Adafruit_NeoPixel.h>
 Adafruit_NeoPixel led(32, A11, NEO_GBR + NEO_KHZ800);
-
 
 //const int minluz[] = {16,8,19,14,7,15,11,3,16,8,16};
 //const int maxluz[] = {74,44,108,98,49,101,87,7,120,87,118};
 
 const int minluz[] = {11, 5, 15, 11, 4, 13, 7, 0, 16, 7, 13};
 const int maxluz[] = {35, 39, 26, 20, 13, 27, 15, 1, 35, 13, 39};
-
 
 int x;
 int IR[10];
@@ -321,13 +318,16 @@ void loop() {
         parar();
         if (bola == 1024) {
           for (int k = 0; k < 24; k++) {
-            led.setPixelColor(k, led.Color(0, 0, 255));
+            led.setPixelColor(k, led.Color(0, 255, 0));
           }
           led.show();
-          parar();
         }
         else if (bola == 1023)
         {
+          for (int k = 0; k < 24; k++) {
+            led.setPixelColor(k, led.Color(0, 0, 255));
+          }
+          led.show();
           switch (ir) {
             case 1: //IR1
               Serial.println("0 graus");
