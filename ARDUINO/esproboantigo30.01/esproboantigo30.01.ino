@@ -161,20 +161,29 @@ void loop() {
 
   if (angulogiro > 180) angulogiro -= 360;
 
-  bola = 1024;
-  for (int i = 4; i <= 12 ; i++)
+
+  if(IR[4] < 20 || IR[8] < 20)
   {
-    if (IR[i] > 20)
-    {
-      bola = 1023;
-      Serial.println(bola);
-      break;
-    }
+   bola = 1024;  
   }
+  else
+  {
+   bola = 1023;
+  }
+//  for (int i = 4; i <= 14 ; i++)
+//  {
+//    if (IR[i] < 1)
+//    {
+//      bola = 1024;
+//      //Serial.println(bola);
+//      break;
+//    }
+//  }
 
 
   mySerial.println(bola);
   Serial.println(bola);
+  Serial.println(index);
 
   switch (index)
   {
@@ -248,8 +257,9 @@ void loop() {
       break;
     default:
       Serial.println("Invalido");
-
   }
+
+
   for (int k = 0; k < 16; k++)
   {
     IR[k] = 0;
@@ -259,4 +269,3 @@ void loop() {
   //mySerial.println(angle + 6000);
   //Serial.println(angle);
 }
-
