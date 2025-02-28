@@ -1,3 +1,4 @@
+
 #include <Adafruit_NeoPixel.h>
 Adafruit_NeoPixel led(32, A11, NEO_GBR + NEO_KHZ800);
 
@@ -26,6 +27,8 @@ int bola;
 int gol;
 unsigned long tempoinicial = 0;
 bool alinhando = false;
+int cx;
+int cy;
 
 
 // Motor PWM and Direction pin assignments
@@ -156,6 +159,30 @@ void mover(int vel, int angulo) {
   setMotor(PWM_PIN_RL, DIR_PIN_RL1, DIR_PIN_RL2, wte_v, s[2]);
   setMotor(PWM_PIN_RR, DIR_PIN_RR1, DIR_PIN_RR2, wtd_v, s[3]);
 }
+
+void pegarDirecao()
+{
+  if (ir != 16) {
+    cx = cos(radians((ir - 1) * 22));
+    cy = sin(radians((ir - 1) * 22));
+  }
+  else
+  {
+    cx = cos(0);
+    cy = sin(0);
+  }
+}
+
+void moverAtras()
+{
+  if(cx <  cos(37))
+  {
+    mover(30, 180);// velocidade vai mudar de acordo com a disrancia do sensor ate a bola, depois a gente muda
+    }
+   else{
+    mover(30,0);
+    }
+  }
 
 
 void mudarluz(int b, int g, int r) {
@@ -321,6 +348,7 @@ void loop() {
             led.setPixelColor(k, led.Color(0, 255, 0));
           }
           led.show();
+
         }
         else if (bola == 1023)
         {
