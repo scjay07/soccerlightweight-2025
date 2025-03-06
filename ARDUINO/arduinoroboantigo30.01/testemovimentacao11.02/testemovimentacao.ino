@@ -1,4 +1,3 @@
-
 #include <Adafruit_NeoPixel.h>
 Adafruit_NeoPixel led(32, A11, NEO_GBR + NEO_KHZ800);
 
@@ -168,23 +167,35 @@ void pegarDirecao()
   }
   else
   {
-    cx = cos(0);
-    cy = sin(0);
+    cx = cos(90);
+    cy = sin(90);
   }
 }
-
 void moverAtras()
 {
-  if(cx <  cos(37))
+  if (ir >= 1 && ir <= 8)
   {
-    mover(30, 180);// velocidade vai mudar de acordo com a disrancia do sensor ate a bola, depois a gente muda
+    if (cx < cos(50))
+    {
+      mover(30, 270); // velocidade vai mudar de acordo com a disrancia do sensor ate a bola, depois a gente muda
     }
-   else{
-    mover(30,0);
+    else
+    {
+      mover(30, 0);
     }
   }
-
-
+  if (ir > 8)
+  {
+    if (cx > cos(130))// 180 - 37
+    {
+      mover(30, 90); // velocidade vai mudar de acordo com a disrancia do sensor ate a bola, depois a gente muda
+    }
+    else
+    {
+      mover(30, 0);
+    }
+  }
+}
 void mudarluz(int b, int g, int r) {
   for (int k = 0; k < 32; k++) {
     led.setPixelColor(k, led.Color(g, b, r));
@@ -342,13 +353,15 @@ void loop() {
         }
       }
       else {
-        parar();
-        if (bola == 1024) {
+        // pegarDirecao();
+        // moverAtras();
+        //parar();
+        if (bola == 1024)
+        {
           for (int k = 0; k < 24; k++) {
             led.setPixelColor(k, led.Color(0, 255, 0));
           }
           led.show();
-
         }
         else if (bola == 1023)
         {
