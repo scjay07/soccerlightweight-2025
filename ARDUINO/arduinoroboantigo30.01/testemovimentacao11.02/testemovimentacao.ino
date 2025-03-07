@@ -161,38 +161,62 @@ void mover(int vel, int angulo) {
 
 void pegarDirecao()
 {
-  if (ir != 16) {
+  if (ir != 16 && ir != 1) {
     cx = cos(radians((ir - 1) * 22));
     cy = sin(radians((ir - 1) * 22));
   }
-  else
-  {
-    cx = cos(90);
-    cy = sin(90);
+  else {
+    cx = cos(0);
+    cy = sin(0);
   }
+
 }
 void moverAtras()
 {
   if (ir >= 1 && ir <= 8)
   {
-    if (cx < cos(50))
+
+    if (cx < cos(45))
     {
+      for (int k = 0; k < 24; k++)
+      {
+        led.setPixelColor(k, led.Color(120, 0, 120));
+      }
+      led.show();
       mover(30, 270); // velocidade vai mudar de acordo com a disrancia do sensor ate a bola, depois a gente muda
     }
     else
     {
+      for (int k = 0; k < 24; k++)
+      {
+        led.setPixelColor(k, led.Color(0, 120, 120));
+      }
+      led.show();
       mover(30, 0);
+      delay(70);//ir mais para frente
     }
   }
   if (ir > 8)
   {
-    if (cx > cos(130))// 180 - 37
+   
+    if (cx < cos(45))// 180 - 50
     {
-      mover(30, 90); // velocidade vai mudar de acordo com a disrancia do sensor ate a bola, depois a gente muda
+      for (int k = 0; k < 24; k++)
+      {
+        led.setPixelColor(k, led.Color(120, 0, 120));
+      }
+      led.show();
+      mover(30, 90); // velocidade vai mudar de acordo com a distancia do sensor ate a bola, depois a gente muda
     }
     else
     {
+      for (int k = 0; k < 24; k++)
+      {
+        led.setPixelColor(k, led.Color(0, 120, 120));
+      }
+      led.show();
       mover(30, 0);
+      delay(70);
     }
   }
 }
@@ -341,7 +365,10 @@ void loop() {
         tempoinicial = millis();
         while ((abs(angulolido) > 15 && abs(angulolido) < 345) && (millis() - tempoinicial) <= 75)
         {
-          mudar_cor(0, 0, 255);
+          for (int k = 0; k < 24; k++) {
+            led.setPixelColor(k, led.Color(120, 120, 0));
+          }
+          led.show();
           msg = Serial2.parseInt();
           if (msg >= 2640 && msg <= 3360) {
             angulolido = (msg - 3000);
@@ -352,24 +379,18 @@ void loop() {
           }
         }
       }
-      else {
-        // pegarDirecao();
-        // moverAtras();
+      else
+      {
+        pegarDirecao();
+        moverAtras();
         //parar();
-        if (bola == 1024)
+        for (int k = 0; k < 24; k++)
         {
-          for (int k = 0; k < 24; k++) {
-            led.setPixelColor(k, led.Color(0, 255, 0));
-          }
-          led.show();
+          led.setPixelColor(k, led.Color(0, 0, 255));
         }
-        else if (bola == 1023)
-        {
-          for (int k = 0; k < 24; k++) {
-            led.setPixelColor(k, led.Color(0, 0, 255));
-          }
-          led.show();
-          switch (ir) {
+        led.show();
+        /*  switch (ir)
+          {
             case 1: //IR1
               Serial.println("0 graus");
               parar();
@@ -453,8 +474,7 @@ void loop() {
               break;
             default:
               Serial.println("Invalido");
-          }
-        }
+          }*/
       }
     }
   }
