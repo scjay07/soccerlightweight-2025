@@ -1,3 +1,4 @@
+
 #include <Adafruit_NeoPixel.h>
 Adafruit_NeoPixel led(32, A11, NEO_GBR + NEO_KHZ800);
 
@@ -173,40 +174,59 @@ void pegarDirecao()
 }
 void moverAtras()
 {
-  if (ir >= 1 && ir <= 8)
+  if (ir >=3 && ir >= 5 || ir >= 10 && ir <= 12)
+  {
+    mover (25, 180);
+    delay (25);
+    parar();
+  
+  }
+  if (ir >= 1 && ir <= 2)
   {
 
-    if (cx < cos(45))
+    if (cx < cos(radians(22)))
     {
       for (int k = 0; k < 24; k++)
       {
         led.setPixelColor(k, led.Color(120, 0, 120));
       }
       led.show();
-      mover(30, 270); // velocidade vai mudar de acordo com a disrancia do sensor ate a bola, depois a gente muda
+      mover(25, 270); // velocidade vai mudar de acordo com a disrancia do sensor ate a bola, depois a gente muda
+      delay (25);
+      parar();
+      delay (2);
+      //return;
     }
     else
     {
+      
       for (int k = 0; k < 24; k++)
       {
         led.setPixelColor(k, led.Color(0, 120, 120));
       }
       led.show();
-      mover(30, 0);
-      delay(70);//ir mais para frente
+      mover(25, 0);
+      delay(25);//ir mais para frente
+      parar();
+      //return;
     }
   }
-  if (ir > 8)
+  if (ir >= 13 && ir <= 15)
   {
-   
-    if (cx < cos(45))// 180 - 50
+
+    if (cx < cos(radians(22)))// 180 - 50
     {
+      
       for (int k = 0; k < 24; k++)
       {
         led.setPixelColor(k, led.Color(120, 0, 120));
       }
       led.show();
-      mover(30, 90); // velocidade vai mudar de acordo com a distancia do sensor ate a bola, depois a gente muda
+      mover(25, 90); // velocidade vai mudar de acordo com a disrancia do sensor ate a bola, depois a gente muda
+      delay(25);
+      parar();
+      delay (2);
+      //return;
     }
     else
     {
@@ -215,8 +235,10 @@ void moverAtras()
         led.setPixelColor(k, led.Color(0, 120, 120));
       }
       led.show();
-      mover(30, 0);
-      delay(70);
+      mover(25, 0);
+      delay(25);//ir mais para frente
+      parar();
+      //return;
     }
   }
 }
