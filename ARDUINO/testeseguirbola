@@ -36,4 +36,69 @@ void loop() {
   Serial.print("sensor_max: ");
   Serial.println(sensor_max);
 }
+/* 
+// Definindo os pinos onde os sensores estão conectados
+int sensorPins[16] = {
+  2, 3, 4, 5, 6, 7, 8, 9,
+  10, 11, 12, 13, A0, A1, A2, A3
+};
+
+// Vetor para armazenar os valores de pulseIn
+unsigned long pulseValues[16];
+
+// Variáveis para armazenar o tempo de início do pulso
+unsigned long pulseStart[16];
+bool pulseStarted[16];  // Array que indica se a medição de pulso começou
+
+void setup() {
+  // Inicializa a comunicação serial para mostrar o maior valor
+  Serial.begin(9600);
+
+  // Inicializa os pinos dos sensores como entradas
+  for (int i = 0; i < 16; i++) {
+    pinMode(sensorPins[i], INPUT);
+    pulseStarted[i] = false;  // Inicializa como não iniciado
+  }
+}
+
+void loop() {
+  unsigned long maxPulse = 0;  // Valor do maior pulseIn
+  int maxIndex = -1;           // Índice do sensor com maior pulseIn
+
+  // Verifica todos os sensores para coletar os pulsos
+  for (int i = 0; i < 16; i++) {
+    if (digitalRead(sensorPins[i]) == HIGH && !pulseStarted[i]) {
+      // Quando o pulso começa, marca o início do pulso
+      pulseStart[i] = micros();
+      pulseStarted[i] = true;
+    }
+    
+    // Quando o pulso termina (nível LOW)
+    if (digitalRead(sensorPins[i]) == LOW && pulseStarted[i]) {
+      unsigned long pulseDuration = micros() - pulseStart[i];  // Calcula a duração do pulso
+      pulseValues[i] = pulseDuration;
+      pulseStarted[i] = false;  // Reseta a flag para esperar pelo próximo pulso
+
+      // Atualiza o maior valor de pulse
+      if (pulseValues[i] > maxPulse) {
+        maxPulse = pulseValues[i];
+        maxIndex = i;
+      }
+    }
+  }
+
+  // Exibe o resultado no monitor serial
+  if (maxIndex != -1) {
+    Serial.print("Sensor com maior pulseIn: Sensor ");
+    Serial.print(maxIndex);
+    Serial.print(" com valor: ");
+    Serial.println(maxPulse);
+  }
+
+  // Espera 100ms antes de ler novamente
+  delay(100);
+}
+*/
+
+
 
