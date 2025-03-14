@@ -1,0 +1,7 @@
+git init
+git clone https://github.com/YOUR-USERNAME/YOUR-REPOSITORY
+git add -u
+git add /enderecodoarquivo/ //quando criar uma pasta nova
+git status
+git commit -m ""
+git push -u
