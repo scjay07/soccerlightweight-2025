@@ -1,0 +1,72 @@
+import sensor
+import image
+import time
+
+# Função para calcular o tamanho do blob
+def calcular_tamanho_blob(blob):
+    # Retorna a área do blob
+    return blob.area()
+
+# Inicializar a câmera
+sensor.reset()
+sensor.set_pixformat(sensor.RGB565)
+sensor.set_framesize(sensor.QVGA)
+sensor.skip_frames(time=2000)
+
+# Definir intervalo de cores para o azul
+# Esses valores podem precisar de ajuste dependendo da iluminação e das condições
+#(100, 0, 127, -128, 44, 127)  
+#(33, 0, 3, -128, -3, -128)
+thresholds = (100, 0, 127, -128, 44, 127)  # Intervalo de cor azul (HSV)
+
+# Pega a largura da imagem (QVGA = 320 pixels)
+image_width = sensor.width()
+
+while(True):
+    # Captura uma imagem
+    img = sensor.snapshot()
+
+    # Encontrar blobs de cor azul
+    blobs = img.find_blobs([thresholds], area_threshold=100)
+    
+    # Verificar se encontrou blobs
+    if blobs:
+        # Encontrar o maior blob
+        maior_blob = max(blobs, key=calcular_tamanho_blob)
+        
+        # Posição do centro do maior blob (horizontal)
+        blob_center_x = maior_blob.cx()
+
+        # Calcular a distância do centro da imagem
+        distance_from_center = blob_center_x - (image_width // 2)
+
+        # Calcular o tamanho do maior blob
+        tamanho_blob = calcular_tamanho_blob(maior_blob)
+
+        # Desenhar um retângulo ao redor do maior blob
+        img.draw_rectangle(maior_blob.rect())
+        img.draw_cross(maior_blob.cx(), maior_blob.cy())
+
+        # Exibir a posição do blob em relação ao centro da imagem
+        if distance_from_center < -10:
+            # print(f"Blob está {abs(distance_from_center)} pixels à esquerda do centro.")
+            if distance_from_center < -50:
+                print("muito torto para a esquerda")
+            else:
+                print("torto para a esquerda")
+        elif distance_from_center > 10:
+            # print(f"Blob está {abs(distance_from_center)} pixels à direita do centro.")
+            if distance_from_center > 50:
+                print("muito torto para a direita")
+            else:
+                print("torto para a direita")
+        else:
+            print("No centro.")
+        
+        # Exibir o tamanho do maior blob
+        print(f"Tamanho do maior blob: {tamanho_blob}")
+
+    # Espera um pouco antes de tirar a próxima foto
+    time.sleep(0.1)
+
+
