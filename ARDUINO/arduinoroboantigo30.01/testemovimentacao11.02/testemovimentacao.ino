@@ -16,7 +16,7 @@ const int portasluz[] = { A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10 };
 float valorluz[11];
 int angulolido;
 int angulocorrecao;
-int erromover;
+int erromover;  
 int target;
 float kp = 0.27;
 float kpm = 1.3;
@@ -173,20 +173,21 @@ void pegarDirecao()
 }
 void moverAtras()
 {
-  if (ir >=6 && ir <=9)
-  {
-    mover(30, 90);
-    delay (25);
-    parar();
-  }
-  if (ir >=3 && ir >= 5 || ir >= 10 && ir <= 12)
+//  if (ir >=6 && ir <=9)
+//  {
+//    mover(30, 90);
+//    delay (35);
+//    parar();
+//  }
+  if (ir >=4 && ir >= 5 || ir >= 10 && ir <= 12)
   {
     mover (30, 180);
-    delay (25);
+    delay (45);
     parar();
+    delay(3);
   
   }
-  if (ir >= 1 && ir <= 2)
+  if (ir >= 1 && ir <= 3)
   {
 
     if (cx < cos(radians(22)))
@@ -197,7 +198,7 @@ void moverAtras()
       }
       led.show();
       mover(30, 270); // velocidade vai mudar de acordo com a disrancia do sensor ate a bola, depois a gente muda
-      delay (25);
+      delay (35);
       parar();
       //delay (2);
       //return;
@@ -211,12 +212,12 @@ void moverAtras()
       }
       led.show();
       mover(30, 0);
-      delay(25);//ir mais para frente
+      delay(35);//ir mais para frente
       //parar();
       //return;
     }
   }
-  if (ir >= 13 && ir <= 15)
+  if (ir >= 12 && ir <= 15)
   {
 
     if (cx < cos(radians(22)))// 180 - 50
@@ -228,7 +229,7 @@ void moverAtras()
       }
       led.show();
       mover(30, 90); // velocidade vai mudar de acordo com a disrancia do sensor ate a bola, depois a gente muda
-      delay(25);
+      delay(35);
       parar();
       //delay (2);
       //return;
@@ -241,7 +242,7 @@ void moverAtras()
       }
       led.show();
       mover(30, 0);
-      delay(25);//ir mais para frente
+      delay(35);//ir mais para frente
       //parar();
       //return;
     }
@@ -315,10 +316,10 @@ void alinhar() {
   wte = angulocorrecao;
   wfd = angulocorrecao;
   wtd = angulocorrecao;
-  wfe_v = (byte)map(abs(wfe), 0, 180, 23, 200);
-  wfd_v = (byte)map(abs(wfd), 0, 180, 23, 200);
-  wte_v = (byte)map(abs(wte), 0, 180, 23, 200);
-  wtd_v = (byte)map(abs(wtd), 0, 180, 23, 200);
+  wfe_v = (byte)map(abs(wfe), 0, 180, 18, 200);
+  wfd_v = (byte)map(abs(wfd), 0, 180, 18, 200);
+  wte_v = (byte)map(abs(wte), 0, 180, 18, 200);
+  wtd_v = (byte)map(abs(wtd), 0, 180, 18, 200);
   sentidomotor(wfe, 0);
   sentidomotor(wfd, 1);
   sentidomotor(wte, 2);
@@ -361,7 +362,6 @@ void setup() {
 
 
 void loop() {
- // Serial.println(angulolido);
   erro = target - angulolido;
   angulocorrecao = kp * erro;
   erromover = kpm * erro;
@@ -392,7 +392,7 @@ void loop() {
       if (abs(angulolido) > 20)
       { //se o robô estiver desalinhado em até 50 graus, então alinha);
         tempoinicial = millis();
-        while ((abs(angulolido) > 20 && abs(angulolido) < 340) && (millis() - tempoinicial) <= 75)
+        while ((abs(angulolido) > 20 && abs(angulolido) < 340 ) && (millis() - tempoinicial) <= 75)
         {
           for (int k = 0; k < 24; k++) {
             led.setPixelColor(k, led.Color(120, 120, 0));
