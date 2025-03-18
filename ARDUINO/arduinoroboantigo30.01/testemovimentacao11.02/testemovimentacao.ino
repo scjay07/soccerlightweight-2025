@@ -16,7 +16,7 @@ const int portasluz[] = { A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10 };
 float valorluz[11];
 int angulolido;
 int angulocorrecao;
-int erromover;  
+int erromover;
 int target;
 float kp = 0.27;
 float kpm = 1.3;
@@ -173,19 +173,26 @@ void pegarDirecao()
 }
 void moverAtras()
 {
-//  if (ir >=6 && ir <=9)
-//  {
-//    mover(30, 90);
-//    delay (35);
-//    parar();
-//  }
-  if (ir >=4 && ir >= 5 || ir >= 10 && ir <= 12)
+  //  if (ir >=6 && ir <=9)
+  //  {
+  //    mover(30, 90);
+  //    delay (35);
+  //    parar();
+  //  }
+  if (//ir >= 4 && 
+    ir == 9
+    //ir >= 5 || ir >= 10 //&& ir <= 11
+  )
   {
+
+    for (int k = 0; k < 24; k++)
+    {
+      led.setPixelColor(k, led.Color(200, 200, 200));
+    }
+    led.show();
     mover (30, 180);
-    delay (45);
-    parar();
-    delay(3);
-  
+    delay (50);
+
   }
   if (ir >= 1 && ir <= 3)
   {
@@ -205,7 +212,7 @@ void moverAtras()
     }
     else
     {
-      
+
       for (int k = 0; k < 24; k++)
       {
         led.setPixelColor(k, led.Color(0, 120, 120));
@@ -217,12 +224,12 @@ void moverAtras()
       //return;
     }
   }
-  if (ir >= 12 && ir <= 15)
+  if (ir >= 10 && ir <= 15)
   {
 
     if (cx < cos(radians(22)))// 180 - 50
     {
-      
+
       for (int k = 0; k < 24; k++)
       {
         led.setPixelColor(k, led.Color(120, 0, 120));
@@ -231,7 +238,7 @@ void moverAtras()
       mover(30, 90); // velocidade vai mudar de acordo com a disrancia do sensor ate a bola, depois a gente muda
       delay(35);
       parar();
-      //delay (2);
+      delay (2);
       //return;
     }
     else
@@ -312,14 +319,13 @@ void alinhar() {
   //  else {
   //    kp = 0.134;
   //  }
-  wfe = angulocorrecao;
   wte = angulocorrecao;
   wfd = angulocorrecao;
   wtd = angulocorrecao;
-  wfe_v = (byte)map(abs(wfe), 0, 180, 18, 200);
-  wfd_v = (byte)map(abs(wfd), 0, 180, 18, 200);
-  wte_v = (byte)map(abs(wte), 0, 180, 18, 200);
-  wtd_v = (byte)map(abs(wtd), 0, 180, 18, 200);
+  wfe_v = (byte)map(abs(wfe), 0, 180, 23, 200);
+  wfd_v = (byte)map(abs(wfd), 0, 180, 23, 200);
+  wte_v = (byte)map(abs(wte), 0, 180, 23, 200);
+  wtd_v = (byte)map(abs(wtd), 0, 180, 23, 200);
   sentidomotor(wfe, 0);
   sentidomotor(wfd, 1);
   sentidomotor(wte, 2);
@@ -380,7 +386,7 @@ void loop() {
       }
       else if (msg >= 2640 && msg <= 3360) {
         angulolido = (msg - 3000);
-       // Serial.println(angulolido);
+        // Serial.println(angulolido);
       }
       else if (msg >= 1001 && msg <= 1017) {
         ir = (msg - 1000);
@@ -418,92 +424,92 @@ void loop() {
           led.setPixelColor(k, led.Color(0, 0, 255));
         }
         led.show();
-        /*  switch (ir)
-          {
-            case 1: //IR1
-              Serial.println("0 graus");
-              parar();
-              mover(30, 0);
-              delay(20);
-              break;
-            case 2:
-              Serial.println("315 graus");
-              mover(30, 315);
-              delay(20);
-              break;
-            case 3:
-              Serial.println("292 graus");
-              mover(30, 292);
-              delay(20);
-              break;
-            case 4:
-              Serial.println("270 graus");
-              mover(30, 270);
-              delay(20);
-              break;
-            case 5:
-              Serial.println("247 graus");
-              mover(30, 247);
-              delay(20);
-              break;
-            case 6:
-              Serial.println("225 graus");
-              mover(30, 225);
-              delay(20);
-              break;
-            case 7:
-              Serial.println("202 graus");
-              mover(30, 202);
-              delay(20);
-              break;
-            case 8:
-              Serial.println("180 graus");
-              mover(30, 180);
-              delay(20);
-              break;
-            case 9:
-              Serial.println("157 graus");
-              mover(30, 157);
-              delay(20);
-              break;
-            case 10:
-              Serial.println("135 graus");
-              mover(30, 135);
-              delay(20);
-              break;
-            case 11:
-              Serial.println("112 graus");
-              mover(30, 112);
-              delay(20);
-              break;
-            case 12:
-              Serial.println("90 graus");
-              mover(30, 90);
-              delay(20);
-              break;
-            case 13:
-              Serial.println("67 graus");
-              mover(30, 67);
-              delay(20);
-              break;
-            case 14:
-              Serial.println("45 graus");
-              mover(30, 45);
-              delay(20);
-              break;
-            case 15:
-              Serial.println("22 graus");
-              mover(30, 22);
-              delay(20);
-              break;
-            case 16:
-              Serial.println("0 graus");
-              mover(30, 0);
-              delay(20);
-              break;
-            default:
-              Serial.println("Invalido");
-          }*/
+        //        switch (ir)
+        //        {
+        //          case 1: //IR1
+        //            Serial.println("0 graus");
+        //            parar();
+        //            mover(30, 0);
+        //            delay(20);
+        //            break;
+        //          case 2:
+        //            Serial.println("315 graus");
+        //            mover(30, 315);
+        //            delay(20);
+        //            break;
+        //          case 3:
+        //            Serial.println("292 graus");
+        //            mover(30, 292);
+        //            delay(20);
+        //            break;
+        //          case 4:
+        //            Serial.println("270 graus");
+        //            mover(30, 270);
+        //            delay(20);
+        //            break;
+        //          case 5:
+        //            Serial.println("247 graus");
+        //            mover(30, 247);
+        //            delay(20);
+        //            break;
+        //          case 6:
+        //            Serial.println("225 graus");
+        //            mover(30, 225);
+        //            delay(20);
+        //            break;
+        //          case 7:
+        //            Serial.println("202 graus");
+        //            mover(30, 202);
+        //            delay(20);
+        //            break;
+        //          case 8:
+        //            Serial.println("180 graus");
+        //            mover(30, 180);
+        //            delay(20);
+        //            break;
+        //          case 9:
+        //            Serial.println("157 graus");
+        //            mover(30, 157);
+        //            delay(20);
+        //            break;
+        //          case 10:
+        //            Serial.println("135 graus");
+        //            mover(30, 135);
+        //            delay(20);
+        //            break;
+        //          case 11:
+        //            Serial.println("112 graus");
+        //            mover(30, 112);
+        //            delay(20);
+        //            break;
+        //          case 12:
+        //            Serial.println("90 graus");
+        //            mover(30, 90);
+        //            delay(20);
+        //            break;
+        //          case 13:
+        //            Serial.println("67 graus");
+        //            mover(30, 67);
+        //            delay(20);
+        //            break;
+        //          case 14:
+        //            Serial.println("45 graus");
+        //            mover(30, 45);
+        //            delay(20);
+        //            break;
+        //          case 15:
+        //            Serial.println("22 graus");
+        //            mover(30, 22);
+        //            delay(20);
+        //            break;
+        //          case 16:
+        //            Serial.println("0 graus");
+        //            mover(30, 0);
+        //            delay(20);
+        //            break;
+        //          default:
+        //            Serial.println("Invalido");
+        //        }
       }
     }
   }
