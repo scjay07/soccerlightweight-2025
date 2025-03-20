@@ -1,3 +1,4 @@
+
 #include <Adafruit_NeoPixel.h>
 Adafruit_NeoPixel led(32, A11, NEO_GBR + NEO_KHZ800);
 
@@ -179,8 +180,8 @@ void moverAtras()
   //    delay (35);
   //    parar();
   //  }
-  if (//ir >= 4 && 
-    ir == 9
+  if (//ir >= 4 &&
+    ir == 9 || ir == 8
     //ir >= 5 || ir >= 10 //&& ir <= 11
   )
   {
@@ -205,7 +206,7 @@ void moverAtras()
       }
       led.show();
       mover(30, 270); // velocidade vai mudar de acordo com a disrancia do sensor ate a bola, depois a gente muda
-      delay (35);
+      delay (30);
       parar();
       //delay (2);
       //return;
@@ -236,7 +237,7 @@ void moverAtras()
       }
       led.show();
       mover(30, 90); // velocidade vai mudar de acordo com a disrancia do sensor ate a bola, depois a gente muda
-      delay(35);
+      delay(30);
       parar();
       delay (2);
       //return;
@@ -322,10 +323,10 @@ void alinhar() {
   wte = angulocorrecao;
   wfd = angulocorrecao;
   wtd = angulocorrecao;
-  wfe_v = (byte)map(abs(wfe), 0, 180, 23, 200);
-  wfd_v = (byte)map(abs(wfd), 0, 180, 23, 200);
-  wte_v = (byte)map(abs(wte), 0, 180, 23, 200);
-  wtd_v = (byte)map(abs(wtd), 0, 180, 23, 200);
+  wfe_v = (byte)map(abs(wfe), 0, 180, 25, 200);
+  wfd_v = (byte)map(abs(wfd), 0, 180, 25, 200);
+  wte_v = (byte)map(abs(wte), 0, 180, 25, 200);
+  wtd_v = (byte)map(abs(wtd), 0, 180, 25, 200);
   sentidomotor(wfe, 0);
   sentidomotor(wfd, 1);
   sentidomotor(wte, 2);
@@ -424,92 +425,92 @@ void loop() {
           led.setPixelColor(k, led.Color(0, 0, 255));
         }
         led.show();
-        //        switch (ir)
-        //        {
-        //          case 1: //IR1
-        //            Serial.println("0 graus");
-        //            parar();
-        //            mover(30, 0);
-        //            delay(20);
-        //            break;
-        //          case 2:
-        //            Serial.println("315 graus");
-        //            mover(30, 315);
-        //            delay(20);
-        //            break;
-        //          case 3:
-        //            Serial.println("292 graus");
-        //            mover(30, 292);
-        //            delay(20);
-        //            break;
-        //          case 4:
-        //            Serial.println("270 graus");
-        //            mover(30, 270);
-        //            delay(20);
-        //            break;
-        //          case 5:
-        //            Serial.println("247 graus");
-        //            mover(30, 247);
-        //            delay(20);
-        //            break;
-        //          case 6:
-        //            Serial.println("225 graus");
-        //            mover(30, 225);
-        //            delay(20);
-        //            break;
-        //          case 7:
-        //            Serial.println("202 graus");
-        //            mover(30, 202);
-        //            delay(20);
-        //            break;
-        //          case 8:
-        //            Serial.println("180 graus");
-        //            mover(30, 180);
-        //            delay(20);
-        //            break;
-        //          case 9:
-        //            Serial.println("157 graus");
-        //            mover(30, 157);
-        //            delay(20);
-        //            break;
-        //          case 10:
-        //            Serial.println("135 graus");
-        //            mover(30, 135);
-        //            delay(20);
-        //            break;
-        //          case 11:
-        //            Serial.println("112 graus");
-        //            mover(30, 112);
-        //            delay(20);
-        //            break;
-        //          case 12:
-        //            Serial.println("90 graus");
-        //            mover(30, 90);
-        //            delay(20);
-        //            break;
-        //          case 13:
-        //            Serial.println("67 graus");
-        //            mover(30, 67);
-        //            delay(20);
-        //            break;
-        //          case 14:
-        //            Serial.println("45 graus");
-        //            mover(30, 45);
-        //            delay(20);
-        //            break;
-        //          case 15:
-        //            Serial.println("22 graus");
-        //            mover(30, 22);
-        //            delay(20);
-        //            break;
-        //          case 16:
-        //            Serial.println("0 graus");
-        //            mover(30, 0);
-        //            delay(20);
-        //            break;
-        //          default:
-        //            Serial.println("Invalido");
-        //        }
+   /*     switch (ir)
+        {
+          case 1: //IR1
+            Serial.println("0 graus");
+            parar();
+            mover(30, 0);
+            delay(20);
+            break;
+          case 2:
+            Serial.println("315 graus");
+            mover(30, 315);
+            delay(20);
+            break;
+          case 3:
+            Serial.println("292 graus");
+            mover(30, 292);
+            delay(20);
+            break;
+          case 4:
+            Serial.println("270 graus");
+            mover(30, 270);
+            delay(20);
+            break;
+          case 5:
+            Serial.println("247 graus");
+            mover(30, 247);
+            delay(20);
+            break;
+          case 6:
+            Serial.println("225 graus");
+            mover(30, 225);
+            delay(20);
+            break;
+          case 7:
+            Serial.println("202 graus");
+            mover(30, 202);
+            delay(20);
+            break;
+          case 8:
+            Serial.println("180 graus");
+            mover(30, 180);
+            delay(20);
+            break;
+          case 9:
+            Serial.println("157 graus");
+            mover(30, 157);
+            delay(20);
+            break;
+          case 10:
+            Serial.println("135 graus");
+            mover(30, 135);
+            delay(20);
+            break;
+          case 11:
+            Serial.println("112 graus");
+            mover(30, 112);
+            delay(20);
+            break;
+          case 12:
+            Serial.println("90 graus");
+            mover(30, 90);
+            delay(20);
+            break;
+          case 13:
+            Serial.println("67 graus");
+            mover(30, 67);
+            delay(20);
+            break;
+          case 14:
+            Serial.println("45 graus");
+            mover(30, 45);
+            delay(20);
+            break;
+          case 15:
+            Serial.println("22 graus");
+            mover(30, 22);
+            delay(20);
+            break;
+          case 16:
+            Serial.println("0 graus");
+            mover(30, 0);
+            delay(20);
+            break;
+          default:
+            Serial.println("Invalido");
+        }*/
       }
     }
   }
