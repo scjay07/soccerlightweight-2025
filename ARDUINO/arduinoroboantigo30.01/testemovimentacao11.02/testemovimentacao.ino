@@ -1,4 +1,5 @@
 
+
 #include <Adafruit_NeoPixel.h>
 Adafruit_NeoPixel led(32, A11, NEO_GBR + NEO_KHZ800);
 
@@ -19,7 +20,7 @@ int angulolido;
 int angulocorrecao;
 int erromover;
 int target;
-float kp = 0.27;
+float kp = 0.285;
 float kpm = 1.3;
 int erro = 0;
 int ir;
@@ -174,16 +175,13 @@ void pegarDirecao()
 }
 void moverAtras()
 {
-  //  if (ir >=6 && ir <=9)
-  //  {
-  //    mover(30, 90);
-  //    delay (35);
-  //    parar();
-  //  }
-  if (//ir >= 4 &&
-    ir == 9 || ir == 8
-    //ir >= 5 || ir >= 10 //&& ir <= 11
-  )
+    if (ir >=8 && ir <=9)
+    {
+      mover(30, 90);
+      delay (25);
+      parar();
+    }
+  if (ir >= 5 && ir <= 7 || ir == 10 )
   {
 
     for (int k = 0; k < 24; k++)
@@ -191,11 +189,11 @@ void moverAtras()
       led.setPixelColor(k, led.Color(200, 200, 200));
     }
     led.show();
-    mover (30, 180);
-    delay (50);
+    mover (30, 210); //180
+    delay (40);
 
   }
-  if (ir >= 1 && ir <= 3)
+  if (ir >= 1 && ir <= 4)
   {
 
     if (cx < cos(radians(22)))
@@ -206,7 +204,7 @@ void moverAtras()
       }
       led.show();
       mover(30, 270); // velocidade vai mudar de acordo com a disrancia do sensor ate a bola, depois a gente muda
-      delay (30);
+      delay (25);
       parar();
       //delay (2);
       //return;
@@ -307,26 +305,26 @@ void mudar_cor(int r, int g, int b)
 }
 
 void alinhar() {
-  //
-  //  if (abs(angulolido) > 0 && abs(angulolido) <= 2) {
-  //    kp *= 0;
-  //  }
-  //  else if (angulocorrecao < 0 && angulocorrecao >= -2) {
-  //    kp *= 1.02;
-  //  }
-  //  else if (angulocorrecao >= 6 || angulocorrecao <= -6) {
-  //    kp *= 0.2;
-  //  }
-  //  else {
-  //    kp = 0.134;
-  //  }
+  
+    if (abs(angulolido) > 20 && abs(angulolido) <= 25) {
+      kp *= 1.19;
+    }
+//    else if (angulocorrecao < 0 && angulocorrecao >= -2) {
+//      kp *= 1.02;
+//    }
+//    else if (angulocorrecao >= 6 || angulocorrecao <= -6) {
+//      kp *= 0.2;
+//    }
+    else {
+      kp = 0.285;
+    }
   wte = angulocorrecao;
   wfd = angulocorrecao;
   wtd = angulocorrecao;
-  wfe_v = (byte)map(abs(wfe), 0, 180, 25, 200);
-  wfd_v = (byte)map(abs(wfd), 0, 180, 25, 200);
-  wte_v = (byte)map(abs(wte), 0, 180, 25, 200);
-  wtd_v = (byte)map(abs(wtd), 0, 180, 25, 200);
+  wfe_v = (byte)map(abs(wfe), 0, 180, 27, 200);
+  wfd_v = (byte)map(abs(wfd), 0, 180, 27, 200);
+  wte_v = (byte)map(abs(wte), 0, 180, 27, 200);
+  wtd_v = (byte)map(abs(wtd), 0, 180, 27, 200);
   sentidomotor(wfe, 0);
   sentidomotor(wfd, 1);
   sentidomotor(wte, 2);
@@ -396,10 +394,10 @@ void loop() {
       else if (msg == 333 || msg == 444 || msg == 666) {
         gol = msg;
       }
-      if (abs(angulolido) > 20)
+      if (abs(angulolido) > 26)
       { //se o robô estiver desalinhado em até 50 graus, então alinha);
         tempoinicial = millis();
-        while ((abs(angulolido) > 20 && abs(angulolido) < 340 ) && (millis() - tempoinicial) <= 75)
+        while ((abs(angulolido) > 26 && abs(angulolido) < 334 ) && (millis() - tempoinicial) <= 75)
         {
           for (int k = 0; k < 24; k++) {
             led.setPixelColor(k, led.Color(120, 120, 0));
