@@ -1,0 +1,40 @@
+#include "Arduino.h"
+#include "RPC.h"
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BNO055.h>
+
+Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
+int getAngle_()
+{
+  sensors_event_t event;
+  bno.getEvent(&event);
+
+  // Leitura bruta do eixo Z
+  float angulogiro = event.orientation.x;
+
+  if (angulogiro > 180) angulogiro -= 360;
+
+  return angulogiro;
+}
+void setup()
+{
+  RPC.begin();
+  Serial.begin(115200);
+
+  RPC.bind("getAngle_", getAngle_);
+}
+
+void loop()
+{
+  String buffer = "";
+  while (RPC.available()) {
+    buffer += (char)RPC.read();  // Fill the buffer with characters
+  }
+  if (buffer.length() > 0)
+  {
+    Serial.println("a");
+    Serial.print(buffer);
+  }
+}
+
