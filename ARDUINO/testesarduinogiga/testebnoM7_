@@ -1,3 +1,4 @@
+
 #include "Arduino.h"
 #include "RPC.h"
 #include <Wire.h>
@@ -15,26 +16,38 @@ int getAngle_()
 
   if (angulogiro > 180) angulogiro -= 360;
 
-  return angulogiro;
+  return (int)angulogiro;
 }
 void setup()
 {
   RPC.begin();
   Serial.begin(115200);
+  if (!bno.begin()) {
+    Serial.println("Erro ao inicializar o BNO055!");
+    while (1); // Se o sensor não inicializar, trava a execução
+  }
 
   RPC.bind("getAngle_", getAngle_);
 }
 
 void loop()
 {
+  // String buffer para armazenar dados recebidos via RPC
   String buffer = "";
+
+  // Lê os dados disponíveis na linha RPC
   while (RPC.available()) {
-    buffer += (char)RPC.read();  // Fill the buffer with characters
+    buffer += (char)RPC.read();  // Preenche o buffer com os caracteres recebidos
   }
-  if (buffer.length() > 0)
-  {
-    Serial.println("a");
+
+  // Se o buffer contém dados, imprime-os no Serial
+  if (buffer.length() > 0) {
+    Serial.println("Recebido via RPC:");
     Serial.print(buffer);
   }
-}
 
+  // Pequeno delay para evitar que o loop seja executado rapidamente
+  delay(100);
+//  int msg = getAngle_();
+//  Serial.println(msg);
+}
