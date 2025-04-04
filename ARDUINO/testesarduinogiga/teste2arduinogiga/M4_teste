@@ -1,0 +1,28 @@
+
+#include "Arduino.h"
+#include "RPC.h"
+
+uint16_t ir_values[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+uint8_t ir_addr[18] = {10, 11, 12, 13, 44, 50, 52, 53, 51, 49, 43, 41, 31, 29, 23, 2, 3};
+
+int ultimotempo = 0;
+int intervalo = 500;
+int msg;
+void setup() {
+  RPC.begin();
+  Serial.begin(115200);
+}
+
+void loop()
+{
+
+  // On M7, let's print everything that is received over the RPC1 stream interface
+  // Buffer it, otherwise all characters will be interleaved by other prints
+  if (millis() - ultimotempo >= intervalo) {
+    ultimotempo = millis();
+    msg = RPC.call("getAngle_").as<int>();
+  }
+  RPC.println(msg);
+  delay(400);
+
+}
