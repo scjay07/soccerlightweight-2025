@@ -1,0 +1,44 @@
+#include "Arduino.h"
+#include "RPC.h"
+
+const int portasluz[11] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+//int valorluz[11];
+
+void setup() {
+  Serial.begin(115200);
+}
+
+void loop() {
+  /*sprintf(buff, "luz[0] = %d luz[1] = %d luz[2] = %d luz[3] = %d luz[4] = %d luz[5] = %d luz[6] = %d luz[7] = %d luz[8] = %d luz[9] = %d luz[10] = %d",
+          valorluz[0], valorluz[1], valorluz[2], valorluz[3], valorluz[4], valorluz[5], valorluz[6], valorluz[7], valorluz[8], valorluz[9], valorluz[10]);
+  Serial.println(buff);
+  delay(100);*/
+  
+  Serial.print(analogRead(A0));
+  Serial.print(" ");
+  Serial.print(analogRead(A1));
+  Serial.print(" ");
+  Serial.print(analogRead(A2));
+  Serial.print(" ");
+  Serial.print(analogRead(A3));
+  Serial.print(" ");
+  Serial.print(analogRead(A4));
+  Serial.print(" ");
+  Serial.print(analogRead(A5));
+  Serial.print(" ");
+  Serial.print(analogRead(A6));
+  Serial.print(" ");
+  Serial.print(analogRead(A7));
+  Serial.print(" ");
+  Serial.print(analogRead(A8));
+  Serial.print(" ");
+  Serial.print(analogRead(A9));
+  Serial.print(" ");
+  Serial.print(analogRead(A10));
+  Serial.println(" ");
+
+
+}
+
+
+
