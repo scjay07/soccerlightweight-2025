@@ -1,4 +1,5 @@
 
+
 ///A MARI NAO SABE SALVAR
 
 #include "Arduino.h"
@@ -12,9 +13,9 @@ Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 int angulolido;
 int angulocorrecao;
 int erromover;
-int target;
+int target = 0;
 float kp = 0.285;
-float kpm = 1.3;
+float kpm = 4;
 int erro = 0;
 int ir;
 int bola;
@@ -41,12 +42,12 @@ int getAngle_()
 // Motor PWM and Direction pin assignments
 const int DIR_PIN_FL1 = 37;  // Front-left motor
 const int DIR_PIN_FR1 = 22;  // Front-right motor
-const int DIR_PIN_RL1 = 30;  // Rear-left motor
-const int DIR_PIN_RR1 = 33;  // Rear-right motor
+const int DIR_PIN_RL1 = 35;  // Rear-left motor
+const int DIR_PIN_RR1 = 30;  // Rear-right motor
 const int DIR_PIN_FL2 = 39;
 const int DIR_PIN_FR2 = 24;
-const int DIR_PIN_RL2 = 32;
-const int DIR_PIN_RR2 = 35;
+const int DIR_PIN_RL2 = 33;
+const int DIR_PIN_RR2 = 32;
 const int PWM_PIN_FL = 4;
 const int PWM_PIN_FR = 8;
 const int PWM_PIN_RL = 6;
@@ -56,7 +57,7 @@ const int PWM_PIN_RR = 5;
 const float sen45 = sqrt(2) / 2;
 const float cos45 = sqrt(2) / 2;
 float wfe, wfd, wte, wtd;
-byte wfe_v, wfd_v, wte_v, wtd_v;
+int wfe_v, wfd_v, wte_v, wtd_v;
 int s[4] = { 1, 1, 1, 1 };
 
 
@@ -111,26 +112,42 @@ void mover(int vel, int angulo) {
   wte = (cos45 * vx - sen45 * vy);
   wtd = (-cos45 * vx - sen45 * vy);
 
+  float maxVel = max(max(abs(wfe), abs(wfd)), max(abs(wte), abs(wtd))) + 20;
 
+
+  wfe_v = (map(abs(wfe), 0, maxVel, 0, 255))- erromover; //mudar de zero para 70
+  wfd_v = (map(abs(wfd), 0, maxVel, 0, 255))- erromover;
+  wte_v = (map(abs(wte), 0, maxVel, 0, 255))- erromover;
+  wtd_v = (map(abs(wtd), 0, maxVel, 0, 255))- erromover;
+
+  
   sentidomotor(wfe, 0);
   sentidomotor(wfd, 1);
   sentidomotor(wte, 2);
   sentidomotor(wtd, 3);
 
+  
+  if(abs(wfe_v) > 255) wfe_v = 255;
+  if(abs(wfd_v) > 255) wfd_v = 255;
+  if(abs(wte_v) > 255) wte_v = 255;
+  if(abs(wtd_v) > 255) wtd_v = 255;
 
-  float maxVel = max(max(abs(wfe), abs(wfd)), max(abs(wte), abs(wtd))) + 20;
+  //Serial.println (erromover);
+  
+    Serial.print(wfe_v);
+    Serial.print(" ");
+    Serial.print(wfd_v);
+    Serial.print(" ");
+    Serial.print(wte_v);
+    Serial.print(" ");
+    Serial.print(wtd_v);
+    Serial.println(" ");
+  
 
-
-  wfe_v = (byte)map(abs(wfe), 0, maxVel, 40, 255) - erromover;
-  wfd_v = (byte)map(abs(wfd), 0, maxVel, 40, 255) - erromover;
-  wte_v = (byte)map(abs(wte), 0, maxVel, 40, 255) - erromover;
-  wtd_v = (byte)map(abs(wtd), 0, maxVel, 40, 255) - erromover;
-
-
-  setMotor(PWM_PIN_FL, DIR_PIN_FL1, DIR_PIN_FL2, wfe_v, s[0]);
-  setMotor(PWM_PIN_FR, DIR_PIN_FR1, DIR_PIN_FR2, wfd_v, s[1]);
-  setMotor(PWM_PIN_RL, DIR_PIN_RL1, DIR_PIN_RL2, wte_v, s[2]);
-  setMotor(PWM_PIN_RR, DIR_PIN_RR1, DIR_PIN_RR2, wtd_v, s[3]);
+  setMotor(PWM_PIN_FL, DIR_PIN_FL1, DIR_PIN_FL2, abs(wfe_v), s[0]);
+  setMotor(PWM_PIN_FR, DIR_PIN_FR1, DIR_PIN_FR2, abs(wfd_v), s[1]);
+  setMotor(PWM_PIN_RL, DIR_PIN_RL1, DIR_PIN_RL2, abs(wte_v), s[2]);
+  setMotor(PWM_PIN_RR, DIR_PIN_RR1, DIR_PIN_RR2, abs(wtd_v), s[3]);
 }
 
 void pegarDirecao()
@@ -219,8 +236,9 @@ void alinhar() {
   else {
     kp = 0.285;
   }
-  
+
   wte = angulocorrecao;
+  wfe = angulocorrecao;
   wfd = angulocorrecao;
   wtd = angulocorrecao;
   wfe_v = (byte)map(abs(wfe), 0, 180, 27, 200);
@@ -267,34 +285,38 @@ void loop() {
 
   angulolido = getAngle_();
   //Serial.println(angulolido);
-  int erro = target - angulolido;
-  int angulocorrecao = kp * erro;
-  int erromover = kpm * erro;
+  erro = target - angulolido;
+  angulocorrecao = kp * erro;
+  erromover = kpm * erro;
 
-  ir = RPC.call("send_ir").as<int>();
-  if (ir > -1) {
-    Serial.print("Ir: ");
+  mover (70, 0);
 
-    Serial.println(ir);
-    delay(100);
-  }
-
-  
-   if (abs(angulolido) > 26)
-    { //se o robô estiver desalinhado em até 50 graus, então alinha);
-     tempoinicial = millis();
-     while ((abs(angulolido) > 26 && abs(angulolido) < 334 ) && (millis() - tempoinicial) <= 75)
-     {
-       angulolido = getAngle_();
-       erro = target - angulolido;
-       angulocorrecao = kp * erro;
-       alinhar();
-     }
-    }
-
-    else
-    {
-     pegarDirecao();
-     moverAtras();
-    }
+  //  Serial.println (angulolido);
+  //
+  //  ir = RPC.call("send_ir").as<int>();
+  //  if (ir > -1) {
+  //    Serial.print("Ir: ");
+  //
+  //    Serial.println(ir);
+  //    delay(100);
+  //  }
+  //
+  //
+  //   if (abs(angulolido) > 26)
+  //    { //se o robô estiver desalinhado em até 50 graus, então alinha);
+  //     tempoinicial = millis();
+  //     while ((abs(angulolido) > 26 && abs(angulolido) < 334 ) && (millis() - tempoinicial) <= 75)
+  //     {
+  //       angulolido = getAngle_();
+  //       erro = target - angulolido;
+  //       angulocorrecao = kp * erro;
+  //       alinhar();
+  //     }
+  //    }
+  //
+  //    else
+  //    {
+  //     pegarDirecao();
+  //     moverAtras();
+  //    }
 }
