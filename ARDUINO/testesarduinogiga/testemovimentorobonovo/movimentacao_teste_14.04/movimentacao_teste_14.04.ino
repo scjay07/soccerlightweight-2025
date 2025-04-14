@@ -85,9 +85,9 @@ void mover(int vel, int angulo) {
   wte = (cos45 * vx - sen45 * vy);
   wtd = (-cos45 * vx - sen45 * vy);
 
-  wfe_v = wfe + erromover;
+  wfe_v = wfe - erromover + 70;
   wfd_v = wfd - erromover; //daquele jeito o erro so diminuia a velocidade igual em todos os motores, tem que ser assim
-  wte_v = wte + erromover;
+  wte_v = wte - erromover + 70;
   wtd_v = wtd - erromover;
 
   Serial.print(wfe_v);
@@ -222,8 +222,6 @@ void loop() {
   Serial.println(angulolido);
   erro = target - angulolido;
   erromover = kpm * erro;
-  if (erromover > 50) erromover = 50;
-  if (erromover < -50) erromover = -50;
   /*  ir = RPC.call("send_ir").as<int>();
     if (ir > -1) {
       Serial.print("Ir: ");
