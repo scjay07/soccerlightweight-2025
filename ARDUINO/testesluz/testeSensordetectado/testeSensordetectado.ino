@@ -1,5 +1,7 @@
 int valoresluz[11];
 int minluz[11];
+int t = 11; //variavel para contar se há algum ir maior q zero
+int ultimobranco;
 void setup() {
   // put your setup code here, to run once:
   valoresluz[0] = analogRead(A0);
@@ -19,8 +21,9 @@ void setup() {
     //valoresluz[i] = map(valoresluz[i], minluz[i], 1024, 0, 10);
   }
 }
-
-void loop() {
+void atualizarLuz()
+{
+  t = 11;
   valoresluz[0] = analogRead(A0);
   valoresluz[1] = analogRead(A1);
   valoresluz[2] = analogRead(A2);
@@ -35,20 +38,56 @@ void loop() {
   // put your main code here, to run repeatedly:
   for (int i = 0; i < 11; i++)
   {
-    valoresluz[i] = map(valoresluz[i], minluz[i], 1024, 0, 10);
-    if (i != 10) {
-      Serial.print(valoresluz[i]);
-      Serial.print(" ");
-    }
-    else
+    valoresluz[i] = map(valoresluz[i], minluz[i], 300, 0, 10);
+    /* if (i != 10) {
+       Serial.print(valoresluz[i]);
+       Serial.print(" ");
+      }
+      else
+      {
+       Serial.print(valoresluz[i]);
+       Serial.println(" ");
+      }*/
+    if (valoresluz[i] > 0)
     {
-      Serial.print(valoresluz[i]);
-      Serial.println(" ");
-    }
-    if (valoresluz[i] > 5)
-    {
-      int ultimobranco = i;
+      ultimobranco = i;
+      Serial.println(ultimobranco);
+      t -= 1;
     }
   }
-
+  if (t == 11)
+  {
+    ultimobranco = -1;
+  }
+}
+void desviarLinha()
+{
+    if (ultimobranco == 0 || ultimobranco == 1)
+  {
+    //mover(200,180);
+    //delay(200);
+    Serial.println("tras");
+  }
+  else if ( ultimobranco == 3 || ultimobranco == 4)
+  {
+    //mover(200,270);
+    //delay(200);
+    Serial.println("esquerda");
+  }
+  else if (ultimobranco == 5 || ultimobranco == 6 || ultimobranco == 7)
+  {
+    //mover(200,90);
+    //delay(200);
+    Serial.println("frente");
+  }
+  else if (ultimobranco == 8 || ultimobranco == 9 || ultimobranco == 10)
+  {
+    //mover(200,0);
+    //delay(200);
+    Serial.println("direita");
+  }
+  }
+void loop() {
+  atualizarLuz();
+  desviarLinha();
 }
