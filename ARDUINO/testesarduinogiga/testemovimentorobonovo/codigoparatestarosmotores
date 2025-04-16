@@ -1,0 +1,43 @@
+const int DIR_PIN_FL1 = 37;  // Front-left motor
+const int DIR_PIN_FR1 = 22;  // Front-right motor
+const int DIR_PIN_RL1 = 35;  // Rear-left motor
+const int DIR_PIN_RR1 = 30;  // Rear-right motor
+const int DIR_PIN_FL2 = 39;
+const int DIR_PIN_FR2 = 24;
+const int DIR_PIN_RL2 = 33;
+const int DIR_PIN_RR2 = 32;
+const int PWM_PIN_FL = 4;
+const int PWM_PIN_FR = 8;
+const int PWM_PIN_RL = 5;
+const int PWM_PIN_RR = 6;
+void setup() {
+  // put your setup code here, to run once:
+  pinMode(PWM_PIN_FL, OUTPUT);
+  pinMode(PWM_PIN_FR, OUTPUT);
+  pinMode(PWM_PIN_RL, OUTPUT);
+  pinMode(PWM_PIN_RR, OUTPUT);
+  pinMode(DIR_PIN_FL1, OUTPUT);
+  pinMode(DIR_PIN_FR1, OUTPUT);
+  pinMode(DIR_PIN_RL1, OUTPUT);
+  pinMode(DIR_PIN_RR1, OUTPUT);
+  pinMode(DIR_PIN_FL2, OUTPUT);
+  pinMode(DIR_PIN_FR2, OUTPUT);
+  pinMode(DIR_PIN_RL2, OUTPUT);
+  pinMode(DIR_PIN_RR2, OUTPUT);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  digitalWrite(DIR_PIN_FL1, HIGH);
+  digitalWrite(DIR_PIN_FL2,  LOW);
+  digitalWrite(DIR_PIN_FR1, HIGH);
+  digitalWrite(DIR_PIN_FR2, LOW);
+  digitalWrite(DIR_PIN_RL1, HIGH);
+  digitalWrite(DIR_PIN_RL2, LOW);
+  digitalWrite(DIR_PIN_RR1, HIGH);
+  digitalWrite(DIR_PIN_RR2, LOW);
+  analogWrite(PWM_PIN_FL, 50);
+  analogWrite(PWM_PIN_FR, 50);
+  analogWrite(PWM_PIN_RL, 50);
+  analogWrite(PWM_PIN_RR, 50);
+}
