@@ -1,20 +1,21 @@
 //robo 1 (G)
-const int DIR_PIN_FL1 = 37;  // Front-left motor  HIGH LOW É PARA TRAS
-const int DIR_PIN_FR1 = 22;  // Front-right motor
-const int DIR_PIN_RL1 = 35;  // Rear-left motor
-const int DIR_PIN_RR1 = 32;  // Rear-right motor
+const int DIR_PIN_FL1 = 37;  
 const int DIR_PIN_FL2 = 39;
+
+const int DIR_PIN_FR1 = 22;  
 const int DIR_PIN_FR2 = 24;
-const int DIR_PIN_RL2 = 33;
-const int DIR_PIN_d = 26;
-const int DIR_PIN_d2 = 28;
+
+const int DIR_PIN_RL1 = 33;  
+const int DIR_PIN_RL2 = 35;
+
+const int DIR_PIN_RR1 = 32; 
 const int DIR_PIN_RR2 = 30;
 
-const int PWM_PIN_FL = 4;//fr 4 37 39
-const int PWM_PIN_FR = 8;
-const int PWM_PIN_RL = 5;//fl
-const int PWM_PIN_RR = 6;//rl
-const int dd = 7; //rr
+const int PWM_PIN_FL = 4;//fl 
+const int PWM_PIN_FR = 8; //fr
+const int PWM_PIN_RL = 5;//rl
+const int PWM_PIN_RR = 6;//rr
+
 
 //robo 2 (NAO G)
 //const int DIR_PIN_FR1 = 37;  // FRONT RIGHT 
@@ -50,15 +51,10 @@ void setup() {
   pinMode(DIR_PIN_FR2, OUTPUT);
   pinMode(DIR_PIN_RL2, OUTPUT);
   pinMode(DIR_PIN_RR2, OUTPUT);
-  pinMode(dd, OUTPUT);
-  pinMode(DIR_PIN_d, OUTPUT);
-  pinMode(DIR_PIN_d2, OUTPUT);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  digitalWrite(DIR_PIN_d, LOW);
-  digitalWrite(DIR_PIN_d2, HIGH);
   digitalWrite(DIR_PIN_FL1, LOW);
   digitalWrite(DIR_PIN_FL2,  HIGH);
   digitalWrite(DIR_PIN_FR1, LOW);
@@ -67,7 +63,6 @@ void loop() {
   digitalWrite(DIR_PIN_RL2, HIGH);
   digitalWrite(DIR_PIN_RR1, LOW);
   digitalWrite(DIR_PIN_RR2, HIGH);
-  analogWrite(dd, 255);
   analogWrite(PWM_PIN_FL, 255);
   analogWrite(PWM_PIN_FR, 255);
   analogWrite(PWM_PIN_RL, 255);
