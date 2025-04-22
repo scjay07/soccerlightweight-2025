@@ -1,7 +1,4 @@
-
-
-///A MARI NAO SABE SALVAR
-
+//m7
 #include "Arduino.h"
 #include "RPC.h"
 #include <Wire.h>
@@ -10,20 +7,20 @@
 #include <Ultrasonic.h>
 
 Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
-int angulolido;
-int angulocorrecao;
-int erromover;
+
+int pot = 120; // DELETAR ESSA VARIAVEL
+int erromover = 0, sum_error = 0;
 int target = 0;
-float kp = 0.285;
-float kpm = 4;
-int erro = 0;
+const float kp = 0.9, ki = 0.0;
+float erro = 0;
 int ir;
-int bola;
-int gol;
-unsigned long tempoinicial = 0;
-bool alinhando = false;
 int cx;
 int cy;
+
+int valoresluz[11];
+int minluz[11];
+int t = 11; //variavel para contar se há algum ir maior q zero
+int ultimobranco;
 
 int getAngle_()
 {
@@ -40,26 +37,25 @@ int getAngle_()
 
 
 // Motor PWM and Direction pin assignments
-const int DIR_PIN_FL1 = 37;  // Front-left motor
-const int DIR_PIN_FR1 = 22;  // Front-right motor
-const int DIR_PIN_RL1 = 35;  // Rear-left motor
-const int DIR_PIN_RR1 = 30;  // Rear-right motor
-const int DIR_PIN_FL2 = 39;
-const int DIR_PIN_FR2 = 24;
-const int DIR_PIN_RL2 = 33;
-const int DIR_PIN_RR2 = 32;
-const int PWM_PIN_FL = 4;
-const int PWM_PIN_FR = 8;
-const int PWM_PIN_RL = 6;
-const int PWM_PIN_RR = 5;
+const int DIR_PIN_FL1 = 39;
+const int DIR_PIN_FL2 = 37;
 
+const int DIR_PIN_FR1 = 22;
+const int DIR_PIN_FR2 = 24;
+
+const int DIR_PIN_RL1 = 35;
+const int DIR_PIN_RL2 = 33;
+
+const int DIR_PIN_RR1 = 32;
+const int DIR_PIN_RR2 = 30;
+
+const int PWM_PIN_FL = 4;//fl
+const int PWM_PIN_FR = 8; //fr
+const int PWM_PIN_RL = 5;//rl
+const int PWM_PIN_RR = 6;//rr
 
 const float sen45 = sqrt(2) / 2;
 const float cos45 = sqrt(2) / 2;
-float wfe, wfd, wte, wtd;
-int wfe_v, wfd_v, wte_v, wtd_v;
-int s[4] = { 1, 1, 1, 1 };
-
 
 void setMotor(int pwmPin, int dirPin1, int dirPin2, float velocidade, int sentido) {
   if (velocidade == 0) {
@@ -68,22 +64,60 @@ void setMotor(int pwmPin, int dirPin1, int dirPin2, float velocidade, int sentid
     analogWrite(pwmPin, 0);
     return;
   }
-  if (sentido == 0) {
+  if (!sentido) {
     digitalWrite(dirPin1, LOW);
     digitalWrite(dirPin2, HIGH);
   } else {
     digitalWrite(dirPin1, HIGH);
     digitalWrite(dirPin2, LOW);
   }
-  analogWrite(pwmPin, abs(velocidade));
+  analogWrite(pwmPin, abs(velocidade) > 255 ? 255 : abs(velocidade));
 }
 
 
-int sentidomotor(float w, int indice) {
-  s[indice] = (w > 0) ? 1 : 0;
-  return s[indice];
+int sentidomotor(float w) {
+  return (w > 0) ? 1 : 0;
 }
 
+void mover(int vel, int angulo) {
+  float wfe, wfd, wte, wtd;
+  int wfe_v, wfd_v, wte_v, wtd_v;
+
+  float angulorad = radians(angulo);
+  float vx = vel * cos(angulorad);
+  float vy = vel * sin(angulorad);
+
+  wfe = (cos45 * vx + sen45 * vy);
+  wfd = (-cos45 * vx + sen45 * vy);
+  wte = (cos45 * vx - sen45 * vy);
+  wtd = (-cos45 * vx - sen45 * vy);
+
+  float angulolido = getAngle_();
+  Serial.println(angulolido);
+
+  erro = angulolido - target;
+
+  wfe_v = wfe - kp * erro;
+  wfd_v = wfd - kp * erro; //daquele jeito o erro so diminuia a velocidade igual em todos os motores, tem que ser assim
+  wte_v = wte - kp * erro;
+  wtd_v = wtd - kp * erro;
+
+  Serial.print(wfe_v);
+  Serial.print(" ");
+  Serial.print(wfd_v);
+  Serial.print(" ");
+  Serial.print(wte_v);
+  Serial.print(" ");
+  Serial.print(wtd_v);
+  Serial.println(" ");
+
+  setMotor(PWM_PIN_FR, DIR_PIN_FR1, DIR_PIN_FR2, wfd_v / 2, sentidomotor(wfd_v));
+  setMotor(PWM_PIN_RL, DIR_PIN_RL1, DIR_PIN_RL2, wte_v, sentidomotor(wte_v));
+  setMotor(PWM_PIN_RR, DIR_PIN_RR1, DIR_PIN_RR2, wtd_v, sentidomotor(wtd_v));
+  setMotor(PWM_PIN_FL, DIR_PIN_FL1, DIR_PIN_FL2, wfe_v, sentidomotor(wfe_v));
+
+  sum_error += erro;
+}
 
 void parar() {
   digitalWrite(DIR_PIN_FL1, HIGH);
@@ -100,59 +134,9 @@ void parar() {
   analogWrite(PWM_PIN_RR, 0);
 }
 
-
-void mover(int vel, int angulo) {
-  float angulorad = radians(angulo);
-  float vx = vel * cos(angulorad);
-  float vy = vel * sin(angulorad);
-
-
-  wfe = (cos45 * vx + sen45 * vy);
-  wfd = (-cos45 * vx + sen45 * vy);
-  wte = (cos45 * vx - sen45 * vy);
-  wtd = (-cos45 * vx - sen45 * vy);
-
-  float maxVel = max(max(abs(wfe), abs(wfd)), max(abs(wte), abs(wtd))) + 20;
-
-
-  wfe_v = (map(abs(wfe), 0, maxVel, 0, 255))- erromover; //mudar de zero para 70
-  wfd_v = (map(abs(wfd), 0, maxVel, 0, 255))- erromover;
-  wte_v = (map(abs(wte), 0, maxVel, 0, 255))- erromover;
-  wtd_v = (map(abs(wtd), 0, maxVel, 0, 255))- erromover;
-
-  
-  sentidomotor(wfe, 0);
-  sentidomotor(wfd, 1);
-  sentidomotor(wte, 2);
-  sentidomotor(wtd, 3);
-
-  
-  if(abs(wfe_v) > 255) wfe_v = 255;
-  if(abs(wfd_v) > 255) wfd_v = 255;
-  if(abs(wte_v) > 255) wte_v = 255;
-  if(abs(wtd_v) > 255) wtd_v = 255;
-
-  //Serial.println (erromover);
-  
-    Serial.print(wfe_v);
-    Serial.print(" ");
-    Serial.print(wfd_v);
-    Serial.print(" ");
-    Serial.print(wte_v);
-    Serial.print(" ");
-    Serial.print(wtd_v);
-    Serial.println(" ");
-  
-
-  setMotor(PWM_PIN_FL, DIR_PIN_FL1, DIR_PIN_FL2, abs(wfe_v), s[0]);
-  setMotor(PWM_PIN_FR, DIR_PIN_FR1, DIR_PIN_FR2, abs(wfd_v), s[1]);
-  setMotor(PWM_PIN_RL, DIR_PIN_RL1, DIR_PIN_RL2, abs(wte_v), s[2]);
-  setMotor(PWM_PIN_RR, DIR_PIN_RR1, DIR_PIN_RR2, abs(wtd_v), s[3]);
-}
-
 void pegarDirecao()
 {
-  if (ir != 16 && ir != 1) {
+  if (ir != 1 && ir != 0) {
     cx = cos(radians((ir - 1) * 22));
     cy = sin(radians((ir - 1) * 22));
   }
@@ -164,100 +148,89 @@ void pegarDirecao()
 
 void moverAtras()
 {
+  if (ir >= 0 && ir <= 1 || ir == 17 )
+  {
+    mover(pot * sqrt(2), 0);
+    Serial.println ("frente");
+  }
   if (ir >= 2 && ir <= 4 )
   {
-    mover(30, 90);
-    delay (25);
-    parar();
+    if (cx < cos(radians(22)))// 180 - 50
+    {
+
+
+      mover(pot * sqrt(2), 90); //90// velocidade vai mudar de acordo com a disrancia do sensor ate a bola, depois a gente muda
+      Serial.println ("direita");
+      //      delay(30);
+      //      parar();
+      //      delay (2);
+      //return;
+    }
+    else
+    {
+      mover(pot * sqrt(2), 0);
+      Serial.println ("frente");
+      //delay(35);//ir mais para frente
+      //parar();
+      //return;
+    }
   }
   if (ir >= 5 && ir <= 8 || ir >= 12 && ir <= 14 )
   {
 
-    mover (30, 210); //180
-    delay (40);
+    mover(pot * sqrt(2), 180); //180
+    Serial.println ("re");
+    //delay (40);
 
   }
-  if (ir >= 17 && ir <= 15)
+  if (ir >= 15 && ir <= 16)
   {
 
     if (cx < cos(radians(22)))
     {
-      mover(30, 270); // velocidade vai mudar de acordo com a disrancia do sensor ate a bola, depois a gente muda
-      delay (25);
-      parar();
+      mover(pot * sqrt(2), 270); //270 // velocidade vai mudar de acordo com a disrancia do sensor ate a bola, depois a gente muda
+      Serial.println ("esquerda");
+      //      delay (25);
+      //      parar();
       //delay (2);
       //return;
     }
     else
     {
 
-      mover(30, 0);
-      delay(35);//ir mais para frente
+      mover(pot * sqrt(2), 0);
+      Serial.println ("frente");
+      //delay(35);//ir mais para frente
       //parar();
       //return;
     }
   }
-  if (ir >= 9 && ir <= 11)
-  {
+  //  if (ir >= 9 && ir <= 11)
+  //  {
 
-    if (cx < cos(radians(22)))// 180 - 50
-    {
-
-
-      mover(30, 90); // velocidade vai mudar de acordo com a disrancia do sensor ate a bola, depois a gente muda
-      delay(30);
-      parar();
-      delay (2);
-      //return;
-    }
-    else
-    {
-      mover(30, 0);
-      delay(35);//ir mais para frente
-      //parar();
-      //return;
-    }
-  }
-}
-
-
-
-void alinhar() {
-
-  if (abs(angulolido) > 20 && abs(angulolido) <= 25) {
-    kp *= 1.19;
-  }
-  //    else if (angulocorrecao < 0 && angulocorrecao >= -2) {
-  //      kp *= 1.02;
+  //    if (cx < cos(radians(22)))// 180 - 50
+  //    {
+  //
+  //
+  //      mover(pot * sqrt(2), 120); //90// velocidade vai mudar de acordo com a disrancia do sensor ate a bola, depois a gente muda
+  //      Serial.println ("direita");
+  //      //      delay(30);
+  //      //      parar();
+  //      //      delay (2);
+  //      //return;
   //    }
-  //    else if (angulocorrecao >= 6 || angulocorrecao <= -6) {
-  //      kp *= 0.2;
+  //    else
+  //    {
+  //      mover(pot * sqrt(2), 335);
+  //      Serial.println ("frente");
+  //      //delay(35);//ir mais para frente
+  //      //parar();
+  //      //return;
   //    }
-  else {
-    kp = 0.285;
-  }
-
-  wte = angulocorrecao;
-  wfe = angulocorrecao;
-  wfd = angulocorrecao;
-  wtd = angulocorrecao;
-  wfe_v = (byte)map(abs(wfe), 0, 180, 27, 200);
-  wfd_v = (byte)map(abs(wfd), 0, 180, 27, 200);
-  wte_v = (byte)map(abs(wte), 0, 180, 27, 200);
-  wtd_v = (byte)map(abs(wtd), 0, 180, 27, 200);
-  sentidomotor(wfe, 0);
-  sentidomotor(wfd, 1);
-  sentidomotor(wte, 2);
-  sentidomotor(wtd, 3);
-  setMotor(PWM_PIN_FL, DIR_PIN_FL1, DIR_PIN_FL2, wfe_v, s[0]);
-  setMotor(PWM_PIN_FR, DIR_PIN_FR1, DIR_PIN_FR2, wfd_v, s[1]);
-  setMotor(PWM_PIN_RL, DIR_PIN_RL1, DIR_PIN_RL2, wte_v, s[2]);
-  setMotor(PWM_PIN_RR, DIR_PIN_RR1, DIR_PIN_RR2, wtd_v, s[3]);
+  //}
 }
-
 
 void setup() {
-
   pinMode(PWM_PIN_FL, OUTPUT);
   pinMode(PWM_PIN_FR, OUTPUT);
   pinMode(PWM_PIN_RL, OUTPUT);
@@ -278,45 +251,133 @@ void setup() {
     Serial.println("Erro ao inicializar o BNO055!");
     while (1); // Se o sensor não inicializar, trava a execução
   }
+  mover(200, 0);
+  delay(50);
+  parar();
 
+  valoresluz[0] = analogRead(A0);
+  valoresluz[1] = analogRead(A1);
+  valoresluz[2] = analogRead(A2);
+  valoresluz[3] = analogRead(A3);
+  valoresluz[4] = analogRead(A4);
+  valoresluz[5] = analogRead(A5);
+  valoresluz[6] = analogRead(A6);
+  valoresluz[7] = analogRead(A7);
+  valoresluz[8] = analogRead(A8);
+  valoresluz[9] = analogRead(A9);
+  valoresluz[10] = analogRead(A10);
+  for (int i = 0; i < 11; i++)
+  {
+    minluz[i] = valoresluz[i];
+    //valoresluz[i] = map(valoresluz[i], minluz[i], 1024, 0, 10);
+  }
 }
+void atualizarLuz()
+{
+  t = 11;
+  valoresluz[0] = analogRead(A0);
+  valoresluz[1] = analogRead(A1);
+  valoresluz[2] = analogRead(A2);
+  valoresluz[3] = analogRead(A3);
+  valoresluz[4] = analogRead(A4);
+  valoresluz[5] = analogRead(A5);
+  valoresluz[6] = analogRead(A6);
+  valoresluz[7] = analogRead(A7);
+  valoresluz[8] = analogRead(A8);
+  valoresluz[9] = analogRead(A9);
+  valoresluz[10] = analogRead(A10);
+  // put your main code here, to run repeatedly:
+  for (int i = 0; i < 11; i++)
+  {
+    valoresluz[i] = map(valoresluz[i], minluz[i], 300, 0, 10);
+    /* if (i != 10) {
+       Serial.print(valoresluz[i]);
+       Serial.print(" ");
+      }
+      else
+      {
+       Serial.print(valoresluz[i]);
+       Serial.println(" ");
+      }*/
+    if (valoresluz[i] > 0)
+    {
+      ultimobranco = i;
+      Serial.println(ultimobranco);
+      t -= 1;
+    }
+  }
+  if (t == 11)
+  {
+    ultimobranco = -1;
+  }
+}
+void desviarLinha()
+{
+  if (ultimobranco == 0 || ultimobranco == 1)
+  {
+    mover(pot * sqrt(2), 180);
+    delay(200);
+    Serial.println("tras");
+  }
+  else if ( ultimobranco == 3 || ultimobranco == 4)
+  {
+    mover(pot * sqrt(2), 270);
+    delay(200);
+    Serial.println("esquerda");
+  }
+  else if (ultimobranco == 5 || ultimobranco == 6 || ultimobranco == 7)
+  {
+    mover(pot * sqrt(2), 0);
+    delay(200);
+    Serial.println("frente");
+  }
+  else if (ultimobranco == 8 || ultimobranco == 9 || ultimobranco == 10)
+  {
+    mover(pot * sqrt(2), 90);
+    delay(200);
+    Serial.println("direita");
+  }
+}
+
 
 void loop() {
 
-  angulolido = getAngle_();
-  //Serial.println(angulolido);
-  erro = target - angulolido;
-  angulocorrecao = kp * erro;
-  erromover = kpm * erro;
+  ir = RPC.call("send_ir").as<int>();
+  if (ir > -1) {
+    Serial.print("Ir: ");
 
-  mover (70, 0);
+    Serial.println(ir);
+    delay(100);
+  }
+  atualizarLuz();
 
-  //  Serial.println (angulolido);
-  //
-  //  ir = RPC.call("send_ir").as<int>();
-  //  if (ir > -1) {
-  //    Serial.print("Ir: ");
-  //
-  //    Serial.println(ir);
-  //    delay(100);
-  //  }
-  //
-  //
-  //   if (abs(angulolido) > 26)
-  //    { //se o robô estiver desalinhado em até 50 graus, então alinha);
-  //     tempoinicial = millis();
-  //     while ((abs(angulolido) > 26 && abs(angulolido) < 334 ) && (millis() - tempoinicial) <= 75)
-  //     {
-  //       angulolido = getAngle_();
-  //       erro = target - angulolido;
-  //       angulocorrecao = kp * erro;
-  //       alinhar();
-  //     }
-  //    }
-  //
-  //    else
-  //    {
-  //     pegarDirecao();
-  //     moverAtras();
-  //    }
+   vfc if (ultimobranco == 0 || ultimobranco == 1)
+  {
+    mover(pot * sqrt(2), 180);
+    delay(200);
+    Serial.println("tras branco");
+  }
+  else if ( ultimobranco == 3 || ultimobranco == 4)
+  {
+    mover(pot * sqrt(2), 270);
+    delay(200);
+    Serial.println("esquerda branco");
+  }
+  else if (ultimobranco == 5 || ultimobranco == 6 || ultimobranco == 7)
+  {
+    mover(pot * sqrt(2), 0);
+    delay(200);
+    Serial.println("frente branco");
+  }
+  else if (ultimobranco == 8 || ultimobranco == 9 || ultimobranco == 10)
+  {
+    mover(pot * sqrt(2), 90);
+    delay(200);
+    Serial.println("direita branco");
+  }
+  else
+  {
+    pegarDirecao();
+    moverAtras();
+  }
 }
