@@ -351,7 +351,7 @@ void loop() {
   }
   atualizarLuz();
 
-   vfc if (ultimobranco == 0 || ultimobranco == 1)
+   if (ultimobranco == 0 || ultimobranco == 1)
   {
     mover(pot * sqrt(2), 180);
     delay(200);
