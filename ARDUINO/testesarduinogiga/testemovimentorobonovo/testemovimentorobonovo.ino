@@ -22,6 +22,13 @@ int minluz[11];
 int t = 11; //variavel para contar se há algum ir maior q zero
 int ultimobranco;
 
+Ultrasonic ultrasonic(48, 46);
+Ultrasonic ultrasonic2(45, 47);
+Ultrasonic ultrasonic3(25, 27);
+int distance;
+int distance2;
+int distance3;
+
 int getAngle_()
 {
   sensors_event_t event;
@@ -289,7 +296,7 @@ void atualizarLuz()
   // put your main code here, to run repeatedly:
   for (int i = 0; i < 11; i++)
   {
-    valoresluz[i] = map(valoresluz[i], minluz[i], 300, 0, 10);
+    valoresluz[i] = map(valoresluz[i], minluz[i], 290, 0, 10);
     /* if (i != 10) {
        Serial.print(valoresluz[i]);
        Serial.print(" ");
@@ -313,30 +320,34 @@ void atualizarLuz()
 }
 void desviarLinha()
 {
-  if (ultimobranco == 0 || ultimobranco == 1)
-  {
-    mover(pot * sqrt(2), 180);
-    delay(200);
-    Serial.println("tras");
+  //parar(); // para imediatamente ao detectar linha
+  //delay(20); // leve pausa para garantir que os sensores estabilizem
+
+  // Continue desviando ENQUANTO estiver vendo a linha
+  while (ultimobranco != -1) {
+    if (ultimobranco == 0 || ultimobranco == 1) {
+      mover(pot * sqrt(2), 180); // vai para trás
+      Serial.println("tras branco");
+    }
+    else if (ultimobranco == 3 || ultimobranco == 4) {
+      mover(pot * sqrt(2), 270); // vai para a esquerda
+      Serial.println("esquerda branco");
+    }
+    else if (ultimobranco == 5 || ultimobranco == 6 || ultimobranco == 7) {
+      mover(pot * sqrt(2), 0); // vai para frente
+      Serial.println("frente branco");
+    }
+    else if (ultimobranco == 8 || ultimobranco == 9 || ultimobranco == 10) {
+      mover(pot * sqrt(2), 90); // vai para a direita
+      Serial.println("direita branco");
+    }
+
+    delay(100);       // pequena pausa entre movimentações
+    atualizarLuz();   // atualiza sensores dentro do laço!
   }
-  else if ( ultimobranco == 3 || ultimobranco == 4)
-  {
-    mover(pot * sqrt(2), 270);
-    delay(200);
-    Serial.println("esquerda");
-  }
-  else if (ultimobranco == 5 || ultimobranco == 6 || ultimobranco == 7)
-  {
-    mover(pot * sqrt(2), 0);
-    delay(200);
-    Serial.println("frente");
-  }
-  else if (ultimobranco == 8 || ultimobranco == 9 || ultimobranco == 10)
-  {
-    mover(pot * sqrt(2), 90);
-    delay(200);
-    Serial.println("direita");
-  }
+
+  //parar(); // garante que o robô pare quando sair da linha
+  //delay(10);
 }
 
 
@@ -345,37 +356,26 @@ void loop() {
   ir = RPC.call("send_ir").as<int>();
   if (ir > -1) {
     Serial.print("Ir: ");
-
     Serial.println(ir);
     delay(100);
   }
+
+  distance = ultrasonic.read();
+  distance2 = ultrasonic2.read();
+  distance3 = ultrasonic3.read();
+
   atualizarLuz();
 
-   if (ultimobranco == 0 || ultimobranco == 1)
-  {
-    mover(pot * sqrt(2), 180);
-    delay(200);
-    Serial.println("tras branco");
+  if (ultimobranco != -1) {
+    desviarLinha();
   }
-  else if ( ultimobranco == 3 || ultimobranco == 4)
-  {
-    mover(pot * sqrt(2), 270);
-    delay(200);
-    Serial.println("esquerda branco");
+  else if (distance2 > 60){
+   
+      mover(pot * sqrt(2), 180);
+      delay (500);
+      parar();
   }
-  else if (ultimobranco == 5 || ultimobranco == 6 || ultimobranco == 7)
-  {
-    mover(pot * sqrt(2), 0);
-    delay(200);
-    Serial.println("frente branco");
-  }
-  else if (ultimobranco == 8 || ultimobranco == 9 || ultimobranco == 10)
-  {
-    mover(pot * sqrt(2), 90);
-    delay(200);
-    Serial.println("direita branco");
-  }
-  else
+  else 
   {
     pegarDirecao();
     moverAtras();
