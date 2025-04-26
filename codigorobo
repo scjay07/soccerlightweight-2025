@@ -1,0 +1,383 @@
+//m7
+#include "Arduino.h"
+#include "RPC.h"
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BNO055.h>
+#include <Ultrasonic.h>
+
+Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
+
+int pot = 120; // DELETAR ESSA VARIAVEL
+int erromover = 0, sum_error = 0;
+int target = 0;
+const float kp = 0.9, ki = 0.0;
+float erro = 0;
+int ir;
+int cx;
+int cy;
+
+int valoresluz[11];
+int minluz[11];
+int t = 11; //variavel para contar se há algum ir maior q zero
+int ultimobranco;
+
+Ultrasonic ultrasonic(48, 46);
+Ultrasonic ultrasonic2(45, 47);
+Ultrasonic ultrasonic3(25, 27);
+int distance;
+int distance2;
+int distance3;
+
+int getAngle_()
+{
+  sensors_event_t event;
+  bno.getEvent(&event);
+
+  // Leitura bruta do eixo Z
+  float angulogiro = event.orientation.x;
+
+  if (angulogiro > 180) angulogiro -= 360;
+
+  return (int)angulogiro;
+}
+
+
+// Motor PWM and Direction pin assignments
+const int DIR_PIN_FL1 = 39;
+const int DIR_PIN_FL2 = 37;
+
+const int DIR_PIN_FR1 = 22;
+const int DIR_PIN_FR2 = 24;
+
+const int DIR_PIN_RL1 = 35;
+const int DIR_PIN_RL2 = 33;
+
+const int DIR_PIN_RR1 = 32;
+const int DIR_PIN_RR2 = 30;
+
+const int PWM_PIN_FL = 4;//fl
+const int PWM_PIN_FR = 8; //fr
+const int PWM_PIN_RL = 5;//rl
+const int PWM_PIN_RR = 6;//rr
+
+const float sen45 = sqrt(2) / 2;
+const float cos45 = sqrt(2) / 2;
+
+void setMotor(int pwmPin, int dirPin1, int dirPin2, float velocidade, int sentido) {
+  if (velocidade == 0) {
+    digitalWrite(dirPin1, HIGH);
+    digitalWrite(dirPin2, HIGH);
+    analogWrite(pwmPin, 0);
+    return;
+  }
+  if (!sentido) {
+    digitalWrite(dirPin1, LOW);
+    digitalWrite(dirPin2, HIGH);
+  } else {
+    digitalWrite(dirPin1, HIGH);
+    digitalWrite(dirPin2, LOW);
+  }
+  analogWrite(pwmPin, abs(velocidade) > 255 ? 255 : abs(velocidade));
+}
+
+
+int sentidomotor(float w) {
+  return (w > 0) ? 1 : 0;
+}
+
+void mover(int vel, int angulo) {
+  float wfe, wfd, wte, wtd;
+  int wfe_v, wfd_v, wte_v, wtd_v;
+
+  float angulorad = radians(angulo);
+  float vx = vel * cos(angulorad);
+  float vy = vel * sin(angulorad);
+
+  wfe = (cos45 * vx + sen45 * vy);
+  wfd = (-cos45 * vx + sen45 * vy);
+  wte = (cos45 * vx - sen45 * vy);
+  wtd = (-cos45 * vx - sen45 * vy);
+
+  float angulolido = getAngle_();
+  Serial.println(angulolido);
+
+  erro = angulolido - target;
+
+  wfe_v = wfe - kp * erro;
+  wfd_v = wfd - kp * erro; //daquele jeito o erro so diminuia a velocidade igual em todos os motores, tem que ser assim
+  wte_v = wte - kp * erro;
+  wtd_v = wtd - kp * erro;
+
+  Serial.print(wfe_v);
+  Serial.print(" ");
+  Serial.print(wfd_v);
+  Serial.print(" ");
+  Serial.print(wte_v);
+  Serial.print(" ");
+  Serial.print(wtd_v);
+  Serial.println(" ");
+
+  setMotor(PWM_PIN_FR, DIR_PIN_FR1, DIR_PIN_FR2, wfd_v / 2, sentidomotor(wfd_v));
+  setMotor(PWM_PIN_RL, DIR_PIN_RL1, DIR_PIN_RL2, wte_v, sentidomotor(wte_v));
+  setMotor(PWM_PIN_RR, DIR_PIN_RR1, DIR_PIN_RR2, wtd_v, sentidomotor(wtd_v));
+  setMotor(PWM_PIN_FL, DIR_PIN_FL1, DIR_PIN_FL2, wfe_v, sentidomotor(wfe_v));
+
+  sum_error += erro;
+}
+
+void parar() {
+  digitalWrite(DIR_PIN_FL1, HIGH);
+  digitalWrite(DIR_PIN_FL2, HIGH);
+  digitalWrite(DIR_PIN_FR1, HIGH);
+  digitalWrite(DIR_PIN_FR2, HIGH);
+  digitalWrite(DIR_PIN_RL1, HIGH);
+  digitalWrite(DIR_PIN_RL2, HIGH);
+  digitalWrite(DIR_PIN_RR1, HIGH);
+  digitalWrite(DIR_PIN_RR2, HIGH);
+  analogWrite(PWM_PIN_FL, 0);
+  analogWrite(PWM_PIN_FR, 0);
+  analogWrite(PWM_PIN_RL, 0);
+  analogWrite(PWM_PIN_RR, 0);
+}
+
+void pegarDirecao()
+{
+  if (ir != 1 && ir != 0) {
+    cx = cos(radians((ir - 1) * 22));
+    cy = sin(radians((ir - 1) * 22));
+  }
+  else {
+    cx = cos(0);
+    cy = sin(0);
+  }
+}
+
+void moverAtras()
+{
+  if (ir >= 0 && ir <= 1 || ir == 17 )
+  {
+    mover(pot * sqrt(2), 0);
+    Serial.println ("frente");
+  }
+  if (ir >= 2 && ir <= 4 )
+  {
+    if (cx < cos(radians(22)))// 180 - 50
+    {
+
+
+      mover(pot * sqrt(2), 90); //90// velocidade vai mudar de acordo com a disrancia do sensor ate a bola, depois a gente muda
+      Serial.println ("direita");
+      //      delay(30);
+      //      parar();
+      //      delay (2);
+      //return;
+    }
+    else
+    {
+      mover(pot * sqrt(2), 0);
+      Serial.println ("frente");
+      //delay(35);//ir mais para frente
+      //parar();
+      //return;
+    }
+  }
+  if (ir >= 5 && ir <= 8 || ir >= 12 && ir <= 14 )
+  {
+
+    mover(pot * sqrt(2), 180); //180
+    Serial.println ("re");
+    //delay (40);
+
+  }
+  if (ir >= 15 && ir <= 16)
+  {
+
+    if (cx < cos(radians(22)))
+    {
+      mover(pot * sqrt(2), 270); //270 // velocidade vai mudar de acordo com a disrancia do sensor ate a bola, depois a gente muda
+      Serial.println ("esquerda");
+      //      delay (25);
+      //      parar();
+      //delay (2);
+      //return;
+    }
+    else
+    {
+
+      mover(pot * sqrt(2), 0);
+      Serial.println ("frente");
+      //delay(35);//ir mais para frente
+      //parar();
+      //return;
+    }
+  }
+  //  if (ir >= 9 && ir <= 11)
+  //  {
+
+  //    if (cx < cos(radians(22)))// 180 - 50
+  //    {
+  //
+  //
+  //      mover(pot * sqrt(2), 120); //90// velocidade vai mudar de acordo com a disrancia do sensor ate a bola, depois a gente muda
+  //      Serial.println ("direita");
+  //      //      delay(30);
+  //      //      parar();
+  //      //      delay (2);
+  //      //return;
+  //    }
+  //    else
+  //    {
+  //      mover(pot * sqrt(2), 335);
+  //      Serial.println ("frente");
+  //      //delay(35);//ir mais para frente
+  //      //parar();
+  //      //return;
+  //    }
+  //}
+}
+
+void setup() {
+  pinMode(PWM_PIN_FL, OUTPUT);
+  pinMode(PWM_PIN_FR, OUTPUT);
+  pinMode(PWM_PIN_RL, OUTPUT);
+  pinMode(PWM_PIN_RR, OUTPUT);
+  pinMode(DIR_PIN_FL1, OUTPUT);
+  pinMode(DIR_PIN_FR1, OUTPUT);
+  pinMode(DIR_PIN_RL1, OUTPUT);
+  pinMode(DIR_PIN_RR1, OUTPUT);
+  pinMode(DIR_PIN_FL2, OUTPUT);
+  pinMode(DIR_PIN_FR2, OUTPUT);
+  pinMode(DIR_PIN_RL2, OUTPUT);
+  pinMode(DIR_PIN_RR2, OUTPUT);
+
+
+  RPC.begin();
+  Serial.begin(115200);
+  if (!bno.begin()) {
+    Serial.println("Erro ao inicializar o BNO055!");
+    while (1); // Se o sensor não inicializar, trava a execução
+  }
+  mover(200, 0);
+  delay(50);
+  parar();
+
+  valoresluz[0] = analogRead(A0);
+  valoresluz[1] = analogRead(A1);
+  valoresluz[2] = analogRead(A2);
+  valoresluz[3] = analogRead(A3);
+  valoresluz[4] = analogRead(A4);
+  valoresluz[5] = analogRead(A5);
+  valoresluz[6] = analogRead(A6);
+  valoresluz[7] = analogRead(A7);
+  valoresluz[8] = analogRead(A8);
+  valoresluz[9] = analogRead(A9);
+  valoresluz[10] = analogRead(A10);
+  for (int i = 0; i < 11; i++)
+  {
+    minluz[i] = valoresluz[i];
+    //valoresluz[i] = map(valoresluz[i], minluz[i], 1024, 0, 10);
+  }
+}
+void atualizarLuz()
+{
+  t = 11;
+  valoresluz[0] = analogRead(A0);
+  valoresluz[1] = analogRead(A1);
+  valoresluz[2] = analogRead(A2);
+  valoresluz[3] = analogRead(A3);
+  valoresluz[4] = analogRead(A4);
+  valoresluz[5] = analogRead(A5);
+  valoresluz[6] = analogRead(A6);
+  valoresluz[7] = analogRead(A7);
+  valoresluz[8] = analogRead(A8);
+  valoresluz[9] = analogRead(A9);
+  valoresluz[10] = analogRead(A10);
+  // put your main code here, to run repeatedly:
+  for (int i = 0; i < 11; i++)
+  {
+    valoresluz[i] = map(valoresluz[i], minluz[i], 290, 0, 10);
+    /* if (i != 10) {
+       Serial.print(valoresluz[i]);
+       Serial.print(" ");
+      }
+      else
+      {
+       Serial.print(valoresluz[i]);
+       Serial.println(" ");
+      }*/
+    if (valoresluz[i] > 0)
+    {
+      ultimobranco = i;
+      Serial.println(ultimobranco);
+      t -= 1;
+    }
+  }
+  if (t == 11)
+  {
+    ultimobranco = -1;
+  }
+}
+void desviarLinha()
+{
+  //parar(); // para imediatamente ao detectar linha
+  //delay(20); // leve pausa para garantir que os sensores estabilizem
+
+  // Continue desviando ENQUANTO estiver vendo a linha
+  while (ultimobranco != -1) {
+    if (ultimobranco == 0 || ultimobranco == 1) {
+      mover(pot * sqrt(2), 180); // vai para trás
+      Serial.println("tras branco");
+    }
+    else if (ultimobranco == 3 || ultimobranco == 4) {
+      mover(pot * sqrt(2), 270); // vai para a esquerda
+      Serial.println("esquerda branco");
+    }
+    else if (ultimobranco == 5 || ultimobranco == 6 || ultimobranco == 7) {
+      mover(pot * sqrt(2), 0); // vai para frente
+      Serial.println("frente branco");
+    }
+    else if (ultimobranco == 8 || ultimobranco == 9 || ultimobranco == 10) {
+      mover(pot * sqrt(2), 90); // vai para a direita
+      Serial.println("direita branco");
+    }
+
+    delay(100);       // pequena pausa entre movimentações
+    atualizarLuz();   // atualiza sensores dentro do laço!
+  }
+
+  //parar(); // garante que o robô pare quando sair da linha
+  //delay(10);
+}
+
+
+void loop() {
+
+  ir = RPC.call("send_ir").as<int>();
+  if (ir > -1) {
+    Serial.print("Ir: ");
+    Serial.println(ir);
+    delay(100);
+  }
+
+  distance = ultrasonic.read();
+  distance2 = ultrasonic2.read();
+  distance3 = ultrasonic3.read();
+
+  atualizarLuz();
+
+  if (ultimobranco != -1) {
+    desviarLinha();
+  }
+  else if (distance2 > 60){
+   
+      mover(pot * sqrt(2), 180);
+      delay (500);
+      parar();
+  }
+  else 
+  {
+    pegarDirecao();
+    moverAtras();
+  }
+}
