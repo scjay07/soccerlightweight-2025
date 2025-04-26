@@ -1,0 +1,77 @@
+////robo 1 (G)
+//const int DIR_PIN_FL1 = 37;
+//const int DIR_PIN_FL2 = 39;
+//
+//const int DIR_PIN_FR1 = 22;
+//const int DIR_PIN_FR2 = 24;
+//
+//const int DIR_PIN_RL1 = 33;
+//const int DIR_PIN_RL2 = 35;
+//
+//const int DIR_PIN_RR1 = 32;
+//const int DIR_PIN_RR2 = 30;
+//
+//const int PWM_PIN_FL = 4;//fl
+//const int PWM_PIN_FR = 8; //fr
+//const int PWM_PIN_RL = 5;//rl
+//const int PWM_PIN_RR = 6;//rr
+
+
+//robo 2 (NAO G)
+const int DIR_PIN_FR1 = 35;  // FRONT RIGHT
+const int DIR_PIN_FR2 = 33; // FRONT RIGHT  //37 e 39
+
+const int DIR_PIN_FL1 = 37;  // FRONT LEFT  nao ta funcionando
+const int DIR_PIN_FL2 = 39;// FRONT LEFT
+
+const int DIR_PIN_RL1 = 24;  // REAR LEFT 
+const int DIR_PIN_RL2 = 22; // REAR LEFT
+
+
+const int DIR_PIN_RR1 = 30; // REAR RIGHT
+const int DIR_PIN_RR2 = 32; // REAR RIGHT 
+
+
+const int DIR_PIN_DB1 = 28; // REAR RIGHT nao ta funcionando
+const int DIR_PIN_DB2 = 26; // REAR RIGHT
+
+const int PWM_PIN_FR = 4;//fr 4 37 39
+const int PWM_PIN_FL = 5;//fl
+const int PWM_PIN_RL = 6;//rl
+const int PWM_PIN_RR = 7; //rr
+const int PWM_PIN_DB = 8; //rr
+
+void setup() {
+  // put your setup code here, to run once:
+  pinMode(PWM_PIN_FL, OUTPUT);
+  pinMode(PWM_PIN_FR, OUTPUT);
+  pinMode(PWM_PIN_RL, OUTPUT);
+  pinMode(PWM_PIN_RR, OUTPUT);
+  pinMode(DIR_PIN_FL1, OUTPUT);
+  pinMode(DIR_PIN_FR1, OUTPUT);
+  pinMode(DIR_PIN_RL1, OUTPUT);
+  pinMode(DIR_PIN_RR1, OUTPUT);
+  pinMode(DIR_PIN_FL2, OUTPUT);
+  pinMode(DIR_PIN_FR2, OUTPUT);
+  pinMode(DIR_PIN_RL2, OUTPUT);
+  pinMode(DIR_PIN_RR2, OUTPUT);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  digitalWrite(DIR_PIN_FL1, LOW);
+  digitalWrite(DIR_PIN_FL2, HIGH);
+  digitalWrite(DIR_PIN_FR1, LOW);
+  digitalWrite(DIR_PIN_FR2, HIGH);
+  digitalWrite(DIR_PIN_RL1, LOW);
+  digitalWrite(DIR_PIN_RL2, HIGH);
+  digitalWrite(DIR_PIN_RR1, LOW);
+  digitalWrite(DIR_PIN_RR2, HIGH);
+  digitalWrite(DIR_PIN_DB1, LOW);
+  digitalWrite(DIR_PIN_DB2, HIGH);
+  //analogWrite(PWM_PIN_FL, 255);
+  analogWrite(PWM_PIN_FR, 255);
+  analogWrite(PWM_PIN_RL, 255);
+  analogWrite(PWM_PIN_RR, 255);
+  analogWrite(PWM_PIN_DB, 255);
+}
