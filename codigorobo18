@@ -44,22 +44,24 @@ int getAngle_()
 
 
 // Motor PWM and Direction pin assignments
-const int DIR_PIN_FL1 = 39;
-const int DIR_PIN_FL2 = 37;
+const int DIR_PIN_FR1 = 28;  // FRONT RIGHT 
+const int DIR_PIN_FR2 = 26; // FRONT RIGHT 
 
-const int DIR_PIN_FR1 = 22;
-const int DIR_PIN_FR2 = 24;
+const int DIR_PIN_FL1 = 37;  // FRONT LEFT
+const int DIR_PIN_FL2 = 39;// FRONT LEFT
 
-const int DIR_PIN_RL1 = 35;
-const int DIR_PIN_RL2 = 33;
+const int DIR_PIN_RL1 = 24;  // REAR LEFT
+const int DIR_PIN_RL2 = 22; // REAR LEFT
 
-const int DIR_PIN_RR1 = 32;
-const int DIR_PIN_RR2 = 30;
 
-const int PWM_PIN_FL = 4;//fl
-const int PWM_PIN_FR = 8; //fr
-const int PWM_PIN_RL = 5;//rl
-const int PWM_PIN_RR = 6;//rr
+const int DIR_PIN_RR1 = 30; // REAR RIGHT
+const int DIR_PIN_RR2 = 32; // REAR RIGHT
+
+
+const int PWM_PIN_FR = 8;//fr 4 37 39
+const int PWM_PIN_FL = 5;//fl
+const int PWM_PIN_RL = 6;//rl
+const int PWM_PIN_RR = 7; //rr
 
 const float sen45 = sqrt(2) / 2;
 const float cos45 = sqrt(2) / 2;
@@ -366,18 +368,18 @@ void loop() {
 
   atualizarLuz();
 
-  if (ultimobranco != -1) {
-    desviarLinha();
-  }
-  else if (distance2 > 60){
-   
-      mover(pot * sqrt(2), 180);
-      delay (500);
-      parar();
-  }
-  else 
-  {
+//  if (ultimobranco != -1) {
+//    desviarLinha();
+//  }
+//  else if (distance2 > 60){
+//   
+//      mover(pot * sqrt(2), 180);
+//      delay (500);
+//      parar();
+//  }
+//  else 
+//  {
     pegarDirecao();
     moverAtras();
-  }
+  //}
 }
