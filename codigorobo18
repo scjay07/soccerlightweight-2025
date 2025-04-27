@@ -43,25 +43,25 @@ int getAngle_()
 }
 
 
-// Motor PWM and Direction pin assignments
-const int DIR_PIN_FR1 = 28;  // FRONT RIGHT 
-const int DIR_PIN_FR2 = 26; // FRONT RIGHT 
+/// Motor PWM and Direction pin assignments
+const int DIR_PIN_FR1 = 35;  // FRONT RIGHT
+const int DIR_PIN_FR2 = 33; // FRONT RIGHT
 
 const int DIR_PIN_FL1 = 37;  // FRONT LEFT
 const int DIR_PIN_FL2 = 39;// FRONT LEFT
 
-const int DIR_PIN_RL1 = 24;  // REAR LEFT
-const int DIR_PIN_RL2 = 22; // REAR LEFT
+const int DIR_PIN_RL1 = 22;  // REAR LEFT
+const int DIR_PIN_RL2 = 24; // REAR LEFT
 
 
-const int DIR_PIN_RR1 = 30; // REAR RIGHT
-const int DIR_PIN_RR2 = 32; // REAR RIGHT
+const int DIR_PIN_RR1 = 32; // REAR RIGHT
+const int DIR_PIN_RR2 = 30; // REAR RIGHT
 
 
-const int PWM_PIN_FR = 8;//fr 4 37 39
+const int PWM_PIN_FR = 4;//fr 4 37 39
 const int PWM_PIN_FL = 5;//fl
-const int PWM_PIN_RL = 6;//rl
-const int PWM_PIN_RR = 7; //rr
+const int PWM_PIN_RL = 8;//rl
+const int PWM_PIN_RR = 6; //rr
 
 const float sen45 = sqrt(2) / 2;
 const float cos45 = sqrt(2) / 2;
@@ -120,7 +120,7 @@ void mover(int vel, int angulo) {
   Serial.print(wtd_v);
   Serial.println(" ");
 
-  setMotor(PWM_PIN_FR, DIR_PIN_FR1, DIR_PIN_FR2, wfd_v / 2, sentidomotor(wfd_v));
+  setMotor(PWM_PIN_FR, DIR_PIN_FR1, DIR_PIN_FR2, wfd_v , sentidomotor(wfd_v));
   setMotor(PWM_PIN_RL, DIR_PIN_RL1, DIR_PIN_RL2, wte_v, sentidomotor(wte_v));
   setMotor(PWM_PIN_RR, DIR_PIN_RR1, DIR_PIN_RR2, wtd_v, sentidomotor(wtd_v));
   setMotor(PWM_PIN_FL, DIR_PIN_FL1, DIR_PIN_FL2, wfe_v, sentidomotor(wfe_v));
@@ -354,7 +354,7 @@ void desviarLinha()
 
 
 void loop() {
-
+  mover(200,0);
   ir = RPC.call("send_ir").as<int>();
   if (ir > -1) {
     Serial.print("Ir: ");
@@ -368,18 +368,18 @@ void loop() {
 
   atualizarLuz();
 
-//  if (ultimobranco != -1) {
-//    desviarLinha();
-//  }
-//  else if (distance2 > 60){
-//   
-//      mover(pot * sqrt(2), 180);
-//      delay (500);
-//      parar();
-//  }
-//  else 
-//  {
-    pegarDirecao();
-    moverAtras();
+  //  if (ultimobranco != -1) {
+  //    desviarLinha();
+  //  }
+  //  else if (distance2 > 60){
+  //
+  //      mover(pot * sqrt(2), 180);
+  //      delay (500);
+  //      parar();
+  //  }
+  //  else
+  //  {
+  pegarDirecao();
+  moverAtras();
   //}
 }
